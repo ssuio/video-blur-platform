@@ -1,0 +1,145 @@
+FORMAT: 1A
+
+# User register [/user-service/register]
+
+## Register a user [POST]
+
++ Request (application/json)
+
+    {
+        "email": "a@b.com",
+        "name": "Noah Chou",
+        "password": "Za#$9527"
+    }
+
++ Response 200
+
+# User login [/user-service/login]
+
+## User login [POST]
+
++ Response 200 (application/json)
+
+    {
+        "email": "a@b.com",
+        "name": "Noah Chou",
+        "password": "Za#$9527"
+    }
+
+
+# User profile [/user]
+User profile information.
+
+## Retrieve a user profile [GET]
+
++ Response 200 (application/json)
+  
+    {
+        "email": "a@b.com",
+        "name": "Noah Chou"
+    }     
+
+## Update a profile [POST]
+Update request fields.
+
++ Request (application/json)
+
+        {
+            "name": "Noah Chou"
+        }
+
++ Response 200
+
+# Video Management [/video/{id}]
+
+## Retrieve an video detail [GET]
+
++ Parameters
+
+    + id: 1 (number) - An unique identifier of the video.
+
++ Response 200 (application/json)
+
+        {
+            "id": "ABCDE1",
+            "name": "case A",
+            "description": "",
+            "date": ""
+        }
+
+# Video Management [/video/{id}]
+
+## Update a Message [POST]
+Update a video information.
+
++ Parameters
+
+    + id: 1 (string) - An unique identifier of the video.
+
+
++ Request (application/json)
+
+        {
+            "name": "case C"
+        }
+
++ Response 200
+
+# Video list [/videos]
+
+## Retrieve all videos from a user [GET]
+
++ Response 200 (text/plain)
+
+    [
+        {
+            "id": "ABCDE1",
+            "name": "case A",
+            "description": "",
+            "date": ""
+        },
+        {
+            "id": "ABCDE2",
+            "name": "case B",
+            "description": "",
+            "date": ""
+        }
+    ]
+
+# Video Link [/video-service/sharelink]
+
+## Retrieve an video detail [POST]
+
++ Request (application/json)
+
+ {
+    "id": "ABCDE3"  
+ }
+
++ Response 200 (application/json)
+
+ {
+    "link": "https://host/sharelink/ABCDE3"  
+ }
+
+# Video Link [/video-service/process]
+
+## Retrieve an video detail [POST]
+
++ Request (application/json)
+
+ {
+    
+ }
+
++ Response 200 (application/json)
+
+# Video Link [/sharelink/{id}]
+
+## Retrieve an video detail [GET]
+
++ Parameters
+
+    + id: 1 (string) - An unique identifier of the video.
+
++ Response 200 (video/mp4)
