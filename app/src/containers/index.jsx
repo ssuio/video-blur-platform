@@ -50,9 +50,7 @@ const routes = [
   },
 ];
 
-const Auth = () => <h1> Auth Page </h1>;
 const Page404 = () => <h1> Page 404 </h1>;
-
 const Loading = () => <h1>Loading ... </h1>;
 
 const PrivateRoute = ({ component: Component, ...rest }) => {
@@ -97,7 +95,7 @@ function App() {
     <div>
       <div className="App">
         <Router>
-          {/* <NavMenu /> */}
+          <NavMenu />
           <Switch>
             <Route path="/login" component={Login} />
             <Route path="/register" component={Register} />
