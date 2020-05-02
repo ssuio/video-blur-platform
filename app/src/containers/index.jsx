@@ -1,15 +1,21 @@
 import React from "react";
 import { hot } from "react-hot-loader";
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
-import VedioView from "./VedioPage";
-
-const Main = () => <h1>Main</h1>;
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+  Redirect,
+} from "react-router-dom";
+import VedioView from "./Vedio";
+import { Login, Register } from "./User";
+import axios from "axios";
 
 const NavMenu = () => (
   <div>
     <ul>
       <li>
-        <Link to="/">Main</Link>
+        <Link to="/login">Login</Link>
       </li>
       <li>
         <Link to="/user">Account</Link>
@@ -25,6 +31,11 @@ const NavMenu = () => (
 const routes = [
   {
     key: 0,
+    path: "/login",
+    component: Login,
+  },
+  {
+    key: 1,
     path: "/user",
     component: () => (
       <div>
@@ -33,23 +44,67 @@ const routes = [
     ),
   },
   {
-    key: 1,
+    key: 2,
     path: "/video",
     component: VedioView,
   },
 ];
+
+const Auth = () => <h1> Auth Page </h1>;
+const Page404 = () => <h1> Page 404 </h1>;
+
+const Loading = () => <h1>Loading ... </h1>;
+
+const PrivateRoute = ({ component: Component, ...rest }) => {
+  const [loading, setLoading] = React.useState(true);
+  const [auth, setAuth] = React.useState(false);
+
+  const checkAuth = () => {
+    axios.get("http://127.0.0.1:9000/user")
+        .then(() => {
+          console.log("Succ auth");
+          setAuth(true);
+          setLoading(false);
+        })
+        .catch(()=>{
+          console.log("Failed auth");
+          setLoading(false);
+        });
+  };
+
+  checkAuth();
+
+  return (
+    <Route
+      {...rest}
+      render={(props) =>
+        loading ? (
+          <Loading />
+        ) : auth ? (
+          <Component {...props} />
+        ) : (
+          <Redirect
+            to={{ pathname: "/login", state: { from: props.location } }}
+          />
+        )
+      }
+    />
+  );
+};
 
 function App() {
   return (
     <div>
       <div className="App">
         <Router>
-          <NavMenu />
+          {/* <NavMenu /> */}
           <Switch>
-            <Route exact path="/" component={Main} />
+            <Route path="/login" component={Login} />
+            <Route path="/register" component={Register} />
             {routes.map((route) => (
-              <Route {...route} />
+              <PrivateRoute {...route} />
             ))}
+            <Route path="*" exact={true} component={Page404} />
           </Switch>
         </Router>
       </div>
@@ -57,4 +112,4 @@ function App() {
   );
 }
 
-export default hot(module)(App)
+export default hot(module)(App);
