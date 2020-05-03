@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
-	// "time"
 	"log"
 	"github.com/gorilla/mux"
 	"net/http"
 	"os"
 	"strconv"
 	"io"
+	"vysioneer-assignment/services"
+	"encoding/json"
 	// "github.com/gorilla/sessions"
 )
 
@@ -36,10 +37,18 @@ func registerHandler (w http.ResponseWriter, r *http.Request){
 
 func userHandler(w http.ResponseWriter, r *http.Request){
 	enableCors(&w)
-	
-	fmt.Fprintf(w, string("user"))
-	// w.WriteHeader(http.StatusInternalServerError)
-    // w.Write([]byte("500 - Something bad happened!"))
+	sqliteLocation := os.Getenv("SQLITE_FILE")
+	fmt.Println("ssuio")
+	fmt.Println(sqliteLocation)
+	us := services.GetUserService()
+	u,_ := us.GetUser("1")
+	jsonBytes, err := json.Marshal(u)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+    	w.Write([]byte("500 - Something bad happened!"))
+	}else{
+		fmt.Fprintf(w, string(jsonBytes))
+	}
 }
 
 func videoHandler(w http.ResponseWriter, r *http.Request){

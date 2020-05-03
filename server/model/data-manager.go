@@ -1,23 +1,30 @@
 package model
 
 import (
+	"database/sql"
 	"time"
+	"log"
+	_ "github.com/mattn/go-sqlite3"
+	"os"
+
 )
 
 type User struct {
-	id string `json:"id"`
-	name string `json:"name"`
-	email string `json:"email"`
-	password string 
+	ID string `json:"id"`
+	Name string `json:"name"`
+	Email string `json:"email"`
+	Password string 
+	CreatedTime time.Time
 }
 
 type Video struct {
-	id string `json:"id"`
-	name string `json:"name"`
-	perm Perm `json: "perm"`
-	size int
-	lengthInSecond int
-	date time
+	ID string `json:"id"`
+	Name string `json:"name"`
+	Description string `json:"description"`
+	Perm Perm `json: "perm"`
+	Size int
+	LengthInSecond int
+	Date time.Time
 }
 
 type PermRule struct {
@@ -30,9 +37,9 @@ type Perm struct {
 }
 
 type DataProvider interface {
-	GetUser() User
-	CreateUser()(User, error)
-	GetVideo() Video(User, error)
+	GetUser(id string) (User, error)
+	CreateUser() (User, error)
+	GetVideo() (Video, error)
 	GetVideos() ([]Video, error)
 }
 
@@ -40,23 +47,53 @@ type SqlliteProvider struct {
 
 }
 
-func (s SqlliteProvider) GetUser(){
+func (s SqlliteProvider) GetUser(id string) (User, error){
+	var user User
+	db, err := sql.Open("sqlite3", os.Getenv("SQLITE_FILE"))
+	if err != nil {
+		log.Fatal(err)
+		return user, err
+	}
+	defer db.Close()
 
+	stmt, err := db.Prepare("select id, name, email, password, created_time from user where id = ?")
+	if err != nil {
+		log.Fatal(err)
+		return user, err
+	}
+	defer stmt.Close()
+	user = User{} 
+	err = stmt.QueryRow(id).Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.CreatedTime)
+	if err != nil {
+		log.Fatal(err)
+		return user, err
+	}
+
+	return user, nil
 }
 
-func (s SqlliteProvider) CreateUser(){
-
+func (s SqlliteProvider) CreateUser() (User, error){
+	t, _ := time.Parse("2006-01-02", "2020-05-01")
+	return User{
+		"111",
+		"noah",
+		"noah.chou@eztable.com",
+		"12345678",
+		t,
+	}, nil
 }
 
-func (s SqlliteProvider) GetVideo(){
+func (s SqlliteProvider) GetVideo() (Video, error){
+	return Video{
 
+	}, nil
 }
 
-func (s SqlliteProvider) GetVideos(){
-
+func (s SqlliteProvider) GetVideos() ([]Video, error){
+	return []Video{}, nil
 }
 
 func GetDataManager() DataProvider{
-	p := &SqlliteProvider{}
+	p := SqlliteProvider{}
 	return p
 }
