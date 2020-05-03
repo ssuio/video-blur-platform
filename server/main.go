@@ -9,43 +9,89 @@ import (
 	"strconv"
 	"io"
 	"vysioneer-assignment/services"
+	"vysioneer-assignment/auth"
+	"vysioneer-assignment/model"
 	"encoding/json"
-	// "github.com/gorilla/sessions"
+	"github.com/gorilla/sessions"
 )
 
-func enableCors(w *http.ResponseWriter) {
-	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
+type ViewFunc func(http.ResponseWriter, *http.Request)
+
+func generalHandler(f ViewFunc) ViewFunc{
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		f(w, r)
+		return
+	}
 }
 
-func hello(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, string("hello"))
+func authHandler(f ViewFunc) ViewFunc{
+	return generalHandler(func(w http.ResponseWriter, r *http.Request) {
+		var user model.User
+		session, err := store.Get(r, "vysioneer-assignment")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		//Check session 
+		val := session.Values["user"]
+		if val != nil {
+			f(w, r)
+			return 
+		}
+
+		// Auth user
+		user, err = auth.AuthUser(w, r)
+		if err != nil {
+			w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		} else {
+			session.Values["user"] = &user
+			f(w, r)
+			return 
+		}
+	})
 }
 
 func loginHandler (w http.ResponseWriter, r *http.Request){
-	enableCors(&w)
 	fmt.Fprintf(w, string("user"))
 	w.WriteHeader(http.StatusInternalServerError)
     w.Write([]byte("500 - Something bad happened!"))
 }
 
 func registerHandler (w http.ResponseWriter, r *http.Request){
-	enableCors(&w)
 	fmt.Fprintf(w, string("user"))
 	w.WriteHeader(http.StatusInternalServerError)
     w.Write([]byte("500 - Something bad happened!"))
 }
 
 func userHandler(w http.ResponseWriter, r *http.Request){
-	enableCors(&w)
-	sqliteLocation := os.Getenv("SQLITE_FILE")
-	fmt.Println("ssuio")
-	fmt.Println(sqliteLocation)
+	session, err := store.Get(r, "vysioneer-assignment")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	val := session.Values["user"]
+	var user = &model.User{}
+    if _, ok := val.(*model.User); !ok {
+		// Handle the case that it's not an expected type
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("500 - Something bad happened!"))
+		return
+	}
+	
 	us := services.GetUserService()
-	u,_ := us.GetUser("1")
+	u,_ := us.GetUser(user.ID)
+
 	jsonBytes, err := json.Marshal(u)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-    	w.Write([]byte("500 - Something bad happened!"))
+		w.Write([]byte("500 - Something bad happened!"))
+		return
 	}else{
 		fmt.Fprintf(w, string(jsonBytes))
 	}
@@ -94,11 +140,11 @@ func httpStart(){
 	r := mux.NewRouter()
 	fs := http.FileServer(http.Dir("./dist"))
 	r.Handle("/web/", http.StripPrefix("/web/", fs))
-	r.HandleFunc("/user", userHandler).Methods("GET")
-	r.HandleFunc("/video", videoHandler).Methods("GET")
-	r.HandleFunc("/videos", userHandler)
-	r.HandleFunc("/login", userHandler)
-	r.HandleFunc("/register", userHandler)
+	r.HandleFunc("/user", authHandler(userHandler)).Methods("GET")
+	r.HandleFunc("/video",  authHandler(videoHandler)).Methods("GET")
+	r.HandleFunc("/videos",  generalHandler(userHandler))
+	r.HandleFunc("/login",  generalHandler(userHandler))
+	r.HandleFunc("/register",  generalHandler(userHandler))
 
 	srv := &http.Server{
         Handler:      r,

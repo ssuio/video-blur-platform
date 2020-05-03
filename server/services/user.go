@@ -20,6 +20,10 @@ func (us UserService) GetUser (id string) (model.User, error){
 	return us.dataManager.GetUser(id)
 }
 
+func (us UserService) GetUserByEmail (email string) (model.User, error){
+	return us.dataManager.GetUserByEmail(email)
+}
+
 func (us UserService) Register () error{
 	return nil
 }

@@ -38,6 +38,7 @@ type Perm struct {
 
 type DataProvider interface {
 	GetUser(id string) (User, error)
+	GetUserByEmail(email string) (User, error)
 	CreateUser() (User, error)
 	GetVideo() (Video, error)
 	GetVideos() ([]Video, error)
@@ -64,6 +65,31 @@ func (s SqlliteProvider) GetUser(id string) (User, error){
 	defer stmt.Close()
 	user = User{} 
 	err = stmt.QueryRow(id).Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.CreatedTime)
+	if err != nil {
+		log.Fatal(err)
+		return user, err
+	}
+
+	return user, nil
+}
+
+func (s SqlliteProvider) GetUserByEmail(email string) (User, error){
+	var user User
+	db, err := sql.Open("sqlite3", os.Getenv("SQLITE_FILE"))
+	if err != nil {
+		log.Fatal(err)
+		return user, err
+	}
+	defer db.Close()
+	
+	stmt, err := db.Prepare("select id, name, email, password, created_time from user where email = ?")
+	if err != nil {
+		log.Fatal(err)
+		return user, err
+	}
+	defer stmt.Close()
+	user = User{}
+	err = stmt.QueryRow(email).Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.CreatedTime)
 	if err != nil {
 		log.Fatal(err)
 		return user, err
