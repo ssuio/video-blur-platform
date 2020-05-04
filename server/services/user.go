@@ -16,6 +16,10 @@ type UserService struct{
 	taskManager job.TaskManager
 }
 
+func (us UserService) CreateUser (name, email, password, createdTime string) (error){
+	return us.dataManager.CreateUser(name, email, password, createdTime)
+}
+
 func (us UserService) GetUser (id string) (model.User, error){
 	return us.dataManager.GetUser(id)
 }

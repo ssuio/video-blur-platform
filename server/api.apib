@@ -12,19 +12,22 @@ FORMAT: 1A
         "password": "Za#$9527"
     }
 
-+ Response 200
++ Response 200 (text/plain)
+    ok
 
 # User login [/user-service/login]
 
 ## User login [POST]
 
-+ Response 200 (application/json)
++ Response 200 (text/plain)
+    ok
 
-    {
-        "email": "a@b.com",
-        "name": "Noah Chou",
-        "password": "Za#$9527"
-    }
+# User login [/user-service/logout]
+
+## User login [POST]
+
++ Response 200 (text/plain)
+    ok
 
 
 # User profile [/user]
@@ -36,7 +39,8 @@ User profile information.
   
     {
         "email": "a@b.com",
-        "name": "Noah Chou"
+        "name": "Noah Chou",
+        "createdTime": "2020-05-01T00:00:00Z"
     }     
 
 ## Update a profile [POST]
@@ -64,7 +68,9 @@ Update request fields.
             "id": "ABCDE1",
             "name": "case A",
             "description": "",
-            "date": ""
+            "size": 1024,
+            "imageUrl": "https://host/abc",
+            "createdTime": "2020-01-01-01T00:00:00Z"
         }
 
 # Video Management [/video/{id}]
@@ -129,7 +135,8 @@ Update a video information.
 + Request (application/json)
 
  {
-    
+    "type": "face-recognize",
+    "videoID": "ABCD4",
  }
 
 + Response 200 (application/json)

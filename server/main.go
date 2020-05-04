@@ -1,24 +1,34 @@
 package main
 
 import (
+	"encoding/gob"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
-	"github.com/gorilla/mux"
 	"net/http"
 	"os"
 	"strconv"
-	"io"
-	"vysioneer-assignment/services"
+	"time"
+	"io/ioutil"
 	"vysioneer-assignment/auth"
 	"vysioneer-assignment/model"
-	"encoding/json"
+	"vysioneer-assignment/services"
+
+	"github.com/satori/go.uuid"
+	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 )
 
 var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
+
 type ViewFunc func(http.ResponseWriter, *http.Request)
 
-func generalHandler(f ViewFunc) ViewFunc{
+func init(){
+	gob.Register(&model.User{})
+}
+
+func generalHandler(f ViewFunc) ViewFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		f(w, r)
@@ -26,7 +36,7 @@ func generalHandler(f ViewFunc) ViewFunc{
 	}
 }
 
-func authHandler(f ViewFunc) ViewFunc{
+func authHandler(f ViewFunc) ViewFunc {
 	return generalHandler(func(w http.ResponseWriter, r *http.Request) {
 		var user model.User
 		session, err := store.Get(r, "vysioneer-assignment")
@@ -35,15 +45,16 @@ func authHandler(f ViewFunc) ViewFunc{
 			return
 		}
 
-		//Check session 
+		//Check session
 		val := session.Values["user"]
 		if val != nil {
 			f(w, r)
-			return 
+			return
 		}
 
 		// Auth user
 		user, err = auth.AuthUser(w, r)
+		fmt.Println(user)
 		if err != nil {
 			w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
 			w.WriteHeader(http.StatusUnauthorized)
@@ -51,24 +62,64 @@ func authHandler(f ViewFunc) ViewFunc{
 		} else {
 			session.Values["user"] = &user
 			f(w, r)
-			return 
+			return
 		}
 	})
 }
 
-func loginHandler (w http.ResponseWriter, r *http.Request){
-	fmt.Fprintf(w, string("user"))
-	w.WriteHeader(http.StatusInternalServerError)
-    w.Write([]byte("500 - Something bad happened!"))
+func loginHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, string("ok"))
 }
 
-func registerHandler (w http.ResponseWriter, r *http.Request){
-	fmt.Fprintf(w, string("user"))
-	w.WriteHeader(http.StatusInternalServerError)
-    w.Write([]byte("500 - Something bad happened!"))
+func logoutHandler(w http.ResponseWriter, r *http.Request) {
+	session, err := store.Get(r, "vysioneer-assignment")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	fmt.Println("logout")
+	session.Values["user"] = &model.User{}
+	session.Options.MaxAge = -1
+
+	err = session.Save(r, w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	fmt.Fprintf(w, string("ok"))
 }
 
-func userHandler(w http.ResponseWriter, r *http.Request){
+func registerHandler(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+    if err != nil {
+		fmt.Println("failed1")
+        w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("500 - Something bad happened!"))
+		return
+	}
+
+	user := model.User{}
+	err = json.Unmarshal(body, &user)
+	if err != nil {
+		fmt.Println("failed")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("500 - Something bad happened!"))
+		return
+	}
+
+	us := services.GetUserService()
+	err = us.CreateUser(user.Name, user.Email, user.Password, time.Now().String());
+	if err != nil {
+		fmt.Println("failed2")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("500 - Something bad happened!"))
+		return
+	}
+
+	fmt.Fprintf(w, string("user"))
+}
+
+func userHandler(w http.ResponseWriter, r *http.Request) {
 	session, err := store.Get(r, "vysioneer-assignment")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -77,83 +128,218 @@ func userHandler(w http.ResponseWriter, r *http.Request){
 
 	val := session.Values["user"]
 	var user = &model.User{}
-    if _, ok := val.(*model.User); !ok {
+	var ok bool
+	if user, ok = val.(*model.User); !ok {
 		// Handle the case that it's not an expected type
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("500 - Something bad happened!"))
 		return
 	}
-	
+	fmt.Println(user)
 	us := services.GetUserService()
-	u,_ := us.GetUser(user.ID)
+	u, _ := us.GetUser(user.ID)
 
 	jsonBytes, err := json.Marshal(u)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("500 - Something bad happened!"))
 		return
-	}else{
+	} else {
 		fmt.Fprintf(w, string(jsonBytes))
 	}
 }
 
-func videoHandler(w http.ResponseWriter, r *http.Request){
-	vars := mux.Vars(r)
-	  varID := vars["id"]
-	  println(varID)
-	// fmt.Fprintf(w, "video " + varID)
-	Openfile, err := os.Open("fun.mp4")
-	defer Openfile.Close() //Close after function return
+func uploadHandler(w http.ResponseWriter, r *http.Request) {
+    r.ParseMultipartForm(32 << 20)
+
+    file, fileHandler, err := r.FormFile("file")
+
+    if err != nil {
+        w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("500 - Something bad happened!"))
+    }
+    defer file.Close()
+
+	videoID := uuid.NewV4().String()
+	f, err := os.OpenFile(os.Getenv("VIDEO_DIR")+videoID+".mp4", os.O_WRONLY|os.O_CREATE, 0666)
+	io.Copy(f, file)
+	fi, _ := f.Stat()
+
+	//Record video meta
+	session, err := store.Get(r, "vysioneer-assignment")
 	if err != nil {
-		//File not found, send 404
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	val := session.Values["user"]
+	var user = &model.User{}
+	var ok bool
+	if user, ok = val.(*model.User); !ok {
+		// Handle the case that it's not an expected type
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("500 - Something bad happened!"))
+		return
+	}
+
+	vs := services.GetVideoService()
+	fmt.Printf("filesize %d\n", fi.Size())
+	err = vs.CreateVideo(videoID, user.ID, fileHandler.Filename, "", fi.Size(), time.Now().String())
+    if err != nil {
+        w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("500 - Something bad happened!"))
+    }
+
+    fmt.Fprintf(w, string("ok"))
+}
+
+func downloadHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	varID := vars["id"]
+
+	session, err := store.Get(r, "vysioneer-assignment")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	val := session.Values["user"]
+	var user = &model.User{}
+	var ok bool
+	if user, ok = val.(*model.User); !ok {
+		// Handle the case that it's not an expected type
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("500 - Something bad happened!"))
+		return
+	}
+
+	//Check video meta and permission
+	vs := services.GetVideoService()
+	video, err := vs.GetVideo(varID)
+	fmt.Println(video)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("500 - Something bad happened!"))
+		return
+	}
+
+	if user.ID != video.OwnerID {
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte("401 - Unauthorized"))
+		return
+	}
+
+	Openfile, err := os.Open(os.Getenv("VIDEO_DIR") + varID + ".mp4")
+	defer Openfile.Close()
+	if err != nil {
 		http.Error(w, "File not found.", 404)
 		return
 	}
 
-	//File is found, create and send the correct headers
-
-	//Get the Content-Type of the file
-	//Create a buffer to store the header of the file in
 	FileHeader := make([]byte, 512)
-	//Copy the headers into the FileHeader buffer
 	Openfile.Read(FileHeader)
-	//Get content type of file
 	FileContentType := http.DetectContentType(FileHeader)
 
 	//Get the file size
-	FileStat, _ := Openfile.Stat()                     //Get info from file
-	FileSize := strconv.FormatInt(FileStat.Size(), 10) //Get file size as a string
+	FileStat, _ := Openfile.Stat()
+	FileSize := strconv.FormatInt(FileStat.Size(), 10)
 
-	//Send the headers
-	w.Header().Set("Content-Disposition", "attachment; filename=fun.mp4")
+	w.Header().Set("Content-Disposition", "attachment; filename=" + video.Name)
 	w.Header().Set("Content-Type", FileContentType)
 	w.Header().Set("Content-Length", FileSize)
 
-	//Send the file
-	//We read 512 bytes from the file already, so we reset the offset back to 0
 	Openfile.Seek(0, 0)
-	io.Copy(w, Openfile) //'Copy' the file to the client
+	io.Copy(w, Openfile)
 	return
 }
 
-func httpStart(){
+func videoHandler(w http.ResponseWriter, r *http.Request){
+	params := mux.Vars(r)
+	id := params["id"]
+	vs := services.GetVideoService()
+	video, _ := vs.GetVideo(id)
+
+	jsonBytes, err := json.Marshal(video)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("500 - Something bad happened!"))
+		return
+	} else {
+		fmt.Fprintf(w, string(jsonBytes))
+	}
+}
+
+func videosHandler(w http.ResponseWriter, r *http.Request){
+	session, err := store.Get(r, "vysioneer-assignment")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	val := session.Values["user"]
+	var user = &model.User{}
+	var ok bool
+	if user, ok = val.(*model.User); !ok {
+		// Handle the case that it's not an expected type
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("500 - Something bad happened!"))
+		return
+	}
+
+	vs := services.GetVideoService()
+	videos,err := vs.ListVideos(user.ID)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("500 - Something bad happened!"))
+		return
+	}
+
+	jsonBytes, err := json.Marshal(videos)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("500 - Something bad happened!"))
+		return
+	} else {
+		fmt.Fprintf(w, string(jsonBytes))
+	}
+}
+
+func processVideoHandler(w http.ResponseWriter, r *http.Request){
+	//Get process type
+
+	//Do job
+
+	
+}
+
+func httpStart() {
 	r := mux.NewRouter()
 	fs := http.FileServer(http.Dir("./dist"))
 	r.Handle("/web/", http.StripPrefix("/web/", fs))
+
+	//User
 	r.HandleFunc("/user", authHandler(userHandler)).Methods("GET")
-	r.HandleFunc("/video",  authHandler(videoHandler)).Methods("GET")
-	r.HandleFunc("/videos",  generalHandler(userHandler))
-	r.HandleFunc("/login",  generalHandler(userHandler))
-	r.HandleFunc("/register",  generalHandler(userHandler))
+	r.HandleFunc("/user-service/register", generalHandler(registerHandler))
+	r.HandleFunc("/user-service/login", authHandler(loginHandler)).Methods("POST")
+	r.HandleFunc("/user-service/logout", generalHandler(logoutHandler)).Methods("POST")
+
+	//Video
+	r.HandleFunc("/video", authHandler(videoHandler))
+	r.HandleFunc("/video/{id}", authHandler(videoHandler)).Methods("GET")
+	r.HandleFunc("/videos", authHandler(videosHandler)).Methods("GET")
+	r.HandleFunc("/video-service/upload", authHandler(uploadHandler)).Methods("PUT")
+	r.HandleFunc("/video-service/download/{id}", authHandler(downloadHandler)).Methods("GET")
+	r.HandleFunc("/video-service/sharelink", authHandler(downloadHandler)).Methods("POST")
+	r.HandleFunc("/video-service/process", authHandler(processVideoHandler)).Methods("POST")
 
 	srv := &http.Server{
-        Handler:      r,
-        Addr:         "127.0.0.1:" + os.Getenv("PORT"),
-    }
+		Handler: r,
+		Addr:    os.Getenv("HOST") + ":" + os.Getenv("PORT"),
+	}
 
-    log.Fatal(srv.ListenAndServe())
+	log.Fatal(srv.ListenAndServe())
 }
 
 func main() {
+	fmt.Println("VYSIONEER assignment running...")
 	httpStart()
 }
