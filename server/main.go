@@ -12,13 +12,14 @@ import (
 	"strconv"
 	"time"
 	"vysioneer-assignment/auth"
-	"vysioneer-assignment/job"
+	// "vysioneer-assignment/job"
 	"vysioneer-assignment/model"
 	"vysioneer-assignment/services"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	uuid "github.com/satori/go.uuid"
+	"os/exec"
 )
 
 var store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
@@ -305,14 +306,10 @@ func videosHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func processVideoHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("ssuio In")
 	r.ParseMultipartForm(32 << 20)
 	newName := r.FormValue("name")
 	description := r.FormValue("description")
 
-	fmt.Println("ssuio ")
-	fmt.Println("newName " + newName)
-	fmt.Println("description " + description)
 	// funcType := r.FormValue("type")
 	file, _, err := r.FormFile("file")
 	if err != nil {
@@ -323,10 +320,12 @@ func processVideoHandler(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	videoID := uuid.NewV4().String()
+	fmt.Println("Processing " + videoID)
 	f, err := os.OpenFile(os.Getenv("TMP_DIR")+videoID+".mp4", os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
+		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("500 - Something bad happened!"))
+		w.Write([]byte("500 - Write tmp file failed!"))
 		return
 	}
 
@@ -334,10 +333,22 @@ func processVideoHandler(w http.ResponseWriter, r *http.Request) {
 	fi, _ := f.Stat()
 
 	//Processing video
-	err = job.FaceBlurHandler(videoID)
-	if err != nil {
+	// err = job.FaceBlurHandler(videoID)
+	// if err != nil {
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	w.Write([]byte("500 - Face blur failed"))
+	// 	return
+	// }
+
+	out, er := exec.Command("docker", "run", "-v", os.Getenv("DATA_DIR") + ":/data",
+	"-i", "face-recognition", "-i", "/data/tmp/"+videoID+".mp4", "-o", "/data/videos/"+videoID+".mp4").Output()
+		// fmt.Sprintf("-v %s:/data -i face-recognition -i %s -o %s",
+			// os.Getenv("DATA_DIR"), "/data/tmp/"+videoID+".mp4", "/data/videos/"+videoID+".mp4")).Output()
+	fmt.Printf("FaceBlur result %s\n", out)
+	if er != nil {
+		fmt.Println(er)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("500 - Something bad happened!"))
+		w.Write([]byte("500 - Process video failed!"))
 		return
 	}
 
@@ -353,7 +364,7 @@ func processVideoHandler(w http.ResponseWriter, r *http.Request) {
 	if user, ok = val.(*model.User); !ok {
 		// Handle the case that it's not an expected type
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("500 - Something bad happened!"))
+		w.Write([]byte("500 - User error!"))
 		return
 	}
 
@@ -362,7 +373,8 @@ func processVideoHandler(w http.ResponseWriter, r *http.Request) {
 	err = vs.CreateVideo(videoID, user.ID, newName, description, fi.Size(), time.Now().String())
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("500 - Something bad happened!"))
+		w.Write([]byte("500 - Create video failed."))
+		return 
 	}
 
 	fmt.Fprintf(w, string("ok"))
