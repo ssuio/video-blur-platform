@@ -1,5 +1,4 @@
 .vscode
 *.log
 node_modules
-server/data
 dist

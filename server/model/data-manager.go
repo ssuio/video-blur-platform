@@ -2,54 +2,53 @@ package model
 
 import (
 	"database/sql"
-	"time"
 	"fmt"
 	"log"
-	_ "github.com/mattn/go-sqlite3"
 	"os"
+	"time"
 
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type User struct {
-	ID string `json:"id"`
-	Name string `json:"name"`
-	Email string `json:"email"`
-	Password string 
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
+	Email       string `json:"email"`
+	Password    string
 	CreatedTime time.Time
 }
 
 type Video struct {
-	ID string `json:"id"`
-	Name string `json:"name"`
-	Description string `json:"description"`
-	Size int64 `json: "size"`
+	ID          string    `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Size        int64     `json: "size"`
 	CreatedTime time.Time `json: "createdTime"`
-	ImageUrl string
-	OwnerID string
-	Perm Perm
+	ImageUrl    string
+	OwnerID     int
+	Perm        Perm
 }
 
 type PermRule struct {
-
 }
 
 type Perm struct {
 	ownerID string
-	rules []PermRule
+	rules   []PermRule
 }
 
 type DataProvider interface {
-	GetUser(id string) (User, error)
+	GetUser(id int) (User, error)
 	GetUserByEmail(email string) (User, error)
-	CreateUser(name, email, password, createdTime string) (error)
+	CreateUser(name, email, password, createdTime string) error
 	GetVideo(id string) (Video, error)
-	ListVideos(ownerID string) ([]Video, error)
-	CreateVideo(id string, ownerID string, name string, description string, size int64, createdTime string) error
+	ListVideos(ownerID int) ([]Video, error)
+	CreateVideo(id string, ownerID int, name string, description string, size int64, createdTime string) error
 }
 
-type SqliteProvider struct {}
+type SqliteProvider struct{}
 
-func (s SqliteProvider) GetUser(id string) (User, error){
+func (s SqliteProvider) GetUser(id int) (User, error) {
 	var user User
 	db, err := sql.Open("sqlite3", os.Getenv("SQLITE_FILE"))
 	if err != nil {
@@ -62,7 +61,7 @@ func (s SqliteProvider) GetUser(id string) (User, error){
 		return user, err
 	}
 	defer stmt.Close()
-	user = User{} 
+	user = User{}
 	err = stmt.QueryRow(id).Scan(&user.ID, &user.Name, &user.Email, &user.Password, &user.CreatedTime)
 	if err != nil {
 		return user, err
@@ -71,7 +70,7 @@ func (s SqliteProvider) GetUser(id string) (User, error){
 	return user, nil
 }
 
-func (s SqliteProvider) GetUserByEmail(email string) (User, error){
+func (s SqliteProvider) GetUserByEmail(email string) (User, error) {
 
 	var user User
 	db, err := sql.Open("sqlite3", os.Getenv("SQLITE_FILE"))
@@ -79,7 +78,7 @@ func (s SqliteProvider) GetUserByEmail(email string) (User, error){
 		return user, err
 	}
 	defer db.Close()
-	
+
 	fmt.Println(email)
 	stmt, err := db.Prepare("select id, name, email, password, created_time from user where email = ?")
 	if err != nil {
@@ -95,14 +94,12 @@ func (s SqliteProvider) GetUserByEmail(email string) (User, error){
 	return user, nil
 }
 
-func (s SqliteProvider) CreateUser(name, email, password, createdTime string) (error){
+func (s SqliteProvider) CreateUser(name, email, password, createdTime string) error {
 	db, err := sql.Open("sqlite3", os.Getenv("SQLITE_FILE"))
 	if err != nil {
 		return err
 	}
 	defer db.Close()
-
-	
 
 	stmt, err := db.Prepare("INSERT INTO user (name, email, password, created_time ) VALUES (?, ?, ?, ?)")
 	if err != nil {
@@ -118,14 +115,14 @@ func (s SqliteProvider) CreateUser(name, email, password, createdTime string) (e
 	return nil
 }
 
-func (s SqliteProvider) GetVideo(id string) (Video, error){
+func (s SqliteProvider) GetVideo(id string) (Video, error) {
 	var video Video
 	db, err := sql.Open("sqlite3", os.Getenv("SQLITE_FILE"))
 	if err != nil {
 		return video, err
 	}
 	defer db.Close()
-	
+
 	stmt, err := db.Prepare("select id, owner_id, name, description, size, created_time from video where id = ?")
 	if err != nil {
 		return video, err
@@ -140,14 +137,14 @@ func (s SqliteProvider) GetVideo(id string) (Video, error){
 	return video, nil
 }
 
-func (s SqliteProvider) ListVideos(ownerID string) ([]Video, error){
+func (s SqliteProvider) ListVideos(ownerID int) ([]Video, error) {
 	list := make([]Video, 0)
 	db, err := sql.Open("sqlite3", os.Getenv("SQLITE_FILE"))
 	if err != nil {
 		return list, err
 	}
 	defer db.Close()
-	
+
 	rows, err := db.Query("SELECT id, owner_id, name, description, size, created_time FROM video WHERE owner_id=?", ownerID)
 	if err != nil {
 		log.Fatal(err)
@@ -165,7 +162,7 @@ func (s SqliteProvider) ListVideos(ownerID string) ([]Video, error){
 	return list, nil
 }
 
-func (s SqliteProvider) CreateVideo(id string, ownerID string, name string, description string, size int64, createdTime string) (error){
+func (s SqliteProvider) CreateVideo(id string, ownerID int, name string, description string, size int64, createdTime string) error {
 	db, err := sql.Open("sqlite3", os.Getenv("SQLITE_FILE"))
 	if err != nil {
 		return err
@@ -178,14 +175,14 @@ func (s SqliteProvider) CreateVideo(id string, ownerID string, name string, desc
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(id, ownerID, name, description, size, createdTime )
+	_, err = stmt.Exec(id, ownerID, name, description, size, createdTime)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func GetDataManager() DataProvider{
+func GetDataManager() DataProvider {
 	p := SqliteProvider{}
 	return p
 }

@@ -1,18 +1,19 @@
 package job
 
 import (
-	"os/exec"
 	"fmt"
 	"log"
+	"os"
+	"os/exec"
 )
 
-// TaskManager handle task seq and limit 
+// TaskManager handle task seq and limit
 type TaskManager struct {
 	number int
-	list []Task
+	list   []Task
 }
 
-func (tm TaskManager) addJob(){
+func (tm TaskManager) addJob() {
 
 }
 
@@ -20,20 +21,20 @@ type TaskStatus int
 
 // Task a job
 type Task struct {
-	Result interface{}
-	err error
-	Status TaskStatus // 0=pending, 1=processing, 2=done, 3=failed
+	Result  interface{}
+	err     error
+	Status  TaskStatus // 0=pending, 1=processing, 2=done, 3=failed
 	Handler func(args ...interface{})
 }
 
-func (t Task)start(){
+func (t Task) start() {
 	t.Handler()
 }
 
-func FaceBlurHandler(videoDir, videoID, targetVideoID string) error{
+func FaceBlurHandler(videoID string) error {
 	out, err := exec.Command(
-			fmt.Sprintf("docker run -v %s:/tmp -i face-recongnition -i %s -o %s", 
-			videoDir, "/tmp/"+videoID+".mp4", "/tmp/"+targetVideoID+".mp4")).Output()
+		fmt.Sprintf("docker run -v %s:/data -i face-recongnition -i %s -o %s",
+			os.Getenv("DATA_DIR"), "/data/tmp/"+videoID+".mp4", "/data/videos/"+videoID+".mp4")).Output()
 	if err != nil {
 		log.Fatal(err)
 		return err
