@@ -305,10 +305,16 @@ func videosHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func processVideoHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("ssuio In")
 	r.ParseMultipartForm(32 << 20)
+	newName := r.FormValue("name")
+	description := r.FormValue("description")
 
-	file, fileHandler, err := r.FormFile("file")
-
+	fmt.Println("ssuio ")
+	fmt.Println("newName " + newName)
+	fmt.Println("description " + description)
+	// funcType := r.FormValue("type")
+	file, _, err := r.FormFile("file")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("500 - Something bad happened!"))
@@ -353,7 +359,7 @@ func processVideoHandler(w http.ResponseWriter, r *http.Request) {
 
 	vs := services.GetVideoService()
 	fmt.Printf("filesize %d\n", fi.Size())
-	err = vs.CreateVideo(videoID, user.ID, fileHandler.Filename, "", fi.Size(), time.Now().String())
+	err = vs.CreateVideo(videoID, user.ID, newName, description, fi.Size(), time.Now().String())
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("500 - Something bad happened!"))
