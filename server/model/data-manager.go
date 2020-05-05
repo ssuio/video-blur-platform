@@ -2,7 +2,6 @@ package model
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -24,18 +23,19 @@ type Video struct {
 	Description string    `json:"description"`
 	Size        int64     `json: "size"`
 	CreatedTime time.Time `json: "createdTime"`
-	ImageUrl    string
+	ImageUrl    string `json: "imageUrl"`
 	OwnerID     int
-	Perm        Perm
+	Perm        bool `json: "perm"`
 }
 
-type PermRule struct {
-}
+// TODO 
+// type PermRule struct {
+// }
 
-type Perm struct {
-	ownerID string
-	rules   []PermRule
-}
+// type Perm struct {
+// 	ownerID string
+// 	rules   []PermRule
+// }
 
 type DataProvider interface {
 	GetUser(id int) (User, error)
@@ -44,6 +44,7 @@ type DataProvider interface {
 	GetVideo(id string) (Video, error)
 	ListVideos(ownerID int) ([]Video, error)
 	CreateVideo(id string, ownerID int, name string, description string, size int64, createdTime string) error
+	UpdateVideo(video Video) error
 }
 
 type SqliteProvider struct{}
@@ -79,7 +80,6 @@ func (s SqliteProvider) GetUserByEmail(email string) (User, error) {
 	}
 	defer db.Close()
 
-	fmt.Println(email)
 	stmt, err := db.Prepare("select id, name, email, password, created_time from user where email = ?")
 	if err != nil {
 		return user, err
@@ -123,14 +123,14 @@ func (s SqliteProvider) GetVideo(id string) (Video, error) {
 	}
 	defer db.Close()
 
-	stmt, err := db.Prepare("select id, owner_id, name, description, size, created_time from video where id = ?")
+	stmt, err := db.Prepare("select id, owner_id, perm, name, description, size, created_time from video where id = ?")
 	if err != nil {
 		return video, err
 	}
 	defer stmt.Close()
 
 	video = Video{}
-	err = stmt.QueryRow(id).Scan(&video.ID, &video.OwnerID, &video.Name, &video.Description, &video.Size, &video.CreatedTime)
+	err = stmt.QueryRow(id).Scan(&video.ID, &video.OwnerID, &video.Perm, &video.Name, &video.Description, &video.Size, &video.CreatedTime)
 	if err != nil {
 		return video, err
 	}
@@ -176,6 +176,26 @@ func (s SqliteProvider) CreateVideo(id string, ownerID int, name string, descrip
 	defer stmt.Close()
 
 	_, err = stmt.Exec(id, ownerID, name, description, size, createdTime)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s SqliteProvider) UpdateVideo (video Video) error{
+	db, err := sql.Open("sqlite3", os.Getenv("SQLITE_FILE"))
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	stmt, err := db.Prepare("UPDATE video SET name=?,description=?,owner_id=?,perm=? WHERE id=?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(video.Name, video.Description, video.OwnerID, video.Perm, video.ID)
 	if err != nil {
 		return err
 	}

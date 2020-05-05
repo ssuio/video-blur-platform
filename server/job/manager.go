@@ -2,7 +2,6 @@ package job
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 )
@@ -32,13 +31,18 @@ func (t Task) start() {
 }
 
 func FaceBlurHandler(videoID string) error {
+	source := "/data/tmp/"+videoID+".mp4"
+	dist := "/data/videos/"+videoID+".mp4"
 	out, err := exec.Command(
-		fmt.Sprintf("docker run -v %s:/data -i face-recongnition -i %s -o %s",
-			os.Getenv("DATA_DIR"), "/data/tmp/"+videoID+".mp4", "/data/videos/"+videoID+".mp4")).Output()
+		"docker", "run", 
+		"-v", os.Getenv("DATA_DIR") + ":/data",
+		"-i", "face-blur", 
+		"-i", source, 
+		"-o", dist).Output()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		fmt.Printf("FaceBlur result %s\n", out)
 		return err
 	}
-	fmt.Printf("FaceBlur result %s\n", out)
 	return nil
 }

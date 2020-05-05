@@ -19,7 +19,7 @@ FORMAT: 1A
 
 ## User login [POST]
 
-+ Response 200 (text/plain)
++ Response 200 (application/json)
     ok
 
 # User login [/user-service/logout]
@@ -65,7 +65,7 @@ Update request fields.
 + Response 200 (application/json)
 
         {
-            "id": "ABCDE1",
+            "id": "1b4423df-fce3-4718-b91f-686d679300b6",
             "name": "case A",
             "description": "",
             "size": 1024,
@@ -99,33 +99,21 @@ Update a video information.
 
     [
         {
-            "id": "ABCDE1",
+            "id": "fc9476be-f4a8-40d6-af59-0794ebe9b544",
             "name": "case A",
             "description": "",
             "date": ""
         },
         {
-            "id": "ABCDE2",
+            "id": "1b4423df-fce3-4718-b91f-686d679300b6",
             "name": "case B",
             "description": "",
             "date": ""
         }
     ]
 
-# Video Link [/video-service/sharelink]
-
-## Retrieve an video detail [POST]
-
-+ Request (application/json)
-
  {
-    "id": "ABCDE3"  
- }
-
-+ Response 200 (application/json)
-
- {
-    "link": "https://host/sharelink/ABCDE3"  
+    "link": "https://host/sharelink/fc9476be-f4a8-40d6-af59-0794ebe9b544"  
  }
 
 # Video Link [/video-service/process]
@@ -149,6 +137,16 @@ Update a video information.
 
 + Parameters
 
-    + id: 1 (string) - An unique identifier of the video.
+    + id: fc9476be-f4a8-40d6-af59-0794ebe9b544 (string) - An unique identifier of the video.
 
 + Response 200 (video/mp4)
+
+# Video Link [/video-service/browse/{id}]
+
+## Browse a video [GET]
+
++ Parameters
+
+    + id: fc9476be-f4a8-40d6-af59-0794ebe9b544 (string) - An unique identifier of the video.
+
++ Response 200 (file)

@@ -18,6 +18,10 @@ func (vs VideoService) CreateVideo(id string, ownerID int, name string, descript
 	return vs.dataManager.CreateVideo(id, ownerID, name, description, size, createdTime)
 }
 
+func (vs VideoService) UpdateVideo(video model.Video) error {
+	return vs.dataManager.UpdateVideo(video)
+}
+
 func (vs VideoService) GetVideo(id string) (model.Video, error) {
 	return vs.dataManager.GetVideo(id)
 }
