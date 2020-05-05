@@ -1,9 +1,13 @@
 # For Golang build
+FROM golang:1.13.1-stretch AS builder
+WORKDIR /server/
+COPY ./server/ /server/
+
+RUN GOOS=linux go build -o vysioneer-assignment main.go
 
 # For Server / App
 FROM ubuntu:18.04
 USER root
-RUN echo "nameserver 8.8.8.8" | tee /etc/resolv.conf > /dev/null
 RUN apt-get update && \
 apt-get install -y \
     apt-transport-https \
@@ -20,3 +24,6 @@ RUN add-apt-repository \
 RUN apt-get update && \
 apt-get install -y docker-ce docker-ce-cli containerd.io
 
+COPY --from=builder /server/vysioneer-assignment /vysioneer-assignment-server
+
+CMD ["/vysioneer-assignment-server"]

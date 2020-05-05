@@ -35,7 +35,7 @@ func FaceBlurHandler(videoID string) error {
 	dist := "/data/videos/"+videoID+".mp4"
 	out, err := exec.Command(
 		"docker", "run", 
-		"-v", os.Getenv("DATA_DIR") + ":/data",
+		"-v", os.Getenv("HOST_DATA_DIR") + ":/data",
 		"-i", "face-blur", 
 		"-i", source, 
 		"-o", dist).Output()

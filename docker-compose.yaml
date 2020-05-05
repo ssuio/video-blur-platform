@@ -1,0 +1,19 @@
+version: "3"
+services:
+  vysioneer-assignment:
+    container_name: vysioneer-assignment-server
+    image: vysioneer-assignment
+    ports:
+      - 9000:9000
+    volumes:
+      - ./server/data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment: 
+        PORT: 9000
+        HOST: 0.0.0.0
+        HOST_DATA_DIR: /Users/noahchou/workspace/vysioneer-assignment/server/data
+        DATA_DIR: /data
+        SQLITE_FILE: /data/vysioneer.db
+        VIDEO_DIR: /data/videos/
+        TMP_DIR: /data/tmp/
+        SESSION_KEY: ssuio
