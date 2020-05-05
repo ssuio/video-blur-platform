@@ -9,7 +9,9 @@ import {
 } from "react-router-dom";
 import VedioView from "./Vedio";
 import { Login, Register } from "./User";
-import axios from "axios";
+import apiHelper from "../services/api"
+
+console.log(apiHelper.request())
 
 const NavMenu = () => (
   <div>

@@ -36,7 +36,16 @@ func init() {
 
 func generalHandler(f ViewFunc) ViewFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Headers", "'DNT, X-Mx-ReqToken, Keep-Alive, User-Agent, X-Requested-With, If-Modified-Since, Cache-Control, Content-Type, Authorization, Eztable-Api-Key'")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
+
+		if r.Method == "OPTIONS" {
+			fmt.Fprintf(w, string("ok"))
+			return
+		}
+		
 		f(w, r)
 		return
 	}
@@ -70,6 +79,10 @@ func authHandler(f ViewFunc) ViewFunc {
 			return
 		}
 	})
+}
+
+func healthHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, string("ok"))
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
@@ -476,28 +489,28 @@ func sharelinkHandler(w http.ResponseWriter, r *http.Request) {
 
 
 func httpStart() {
+
 	r := mux.NewRouter()
 	fs := http.FileServer(http.Dir("./dist"))
 	r.Handle("/web/", http.StripPrefix("/web/", fs))
+	r.HandleFunc("/health", generalHandler(healthHandler))
 
 	//User
-	r.HandleFunc("/user", authHandler(userHandler)).Methods("GET")
-	r.HandleFunc("/user-service/register", generalHandler(registerHandler))
-	r.HandleFunc("/user-service/login", authHandler(loginHandler)).Methods("POST")
-	r.HandleFunc("/user-service/logout", generalHandler(logoutHandler)).Methods("POST")
+	r.HandleFunc("/user", authHandler(userHandler)).Methods("GET", "OPTIONS")
+	r.HandleFunc("/user-service/register", generalHandler(registerHandler)).Methods("POST", "OPTIONS")
+	r.HandleFunc("/user-service/login", authHandler(loginHandler)).Methods("POST", "OPTIONS")
+	r.HandleFunc("/user-service/logout", generalHandler(logoutHandler)).Methods("POST", "OPTIONS")
 
 	//Video
-	r.HandleFunc("/video", authHandler(videoHandler))
-	r.HandleFunc("/video/{id}", authHandler(videoHandler))
-	r.HandleFunc("/videos", authHandler(videosHandler)).Methods("GET")
-	r.HandleFunc("/video-service/upload", authHandler(uploadHandler)).Methods("PUT")
-	r.HandleFunc("/video-service/download/{id}", authHandler(downloadHandler)).Methods("GET")
-	r.HandleFunc("/video-service/browse/{id}", authHandler(browseVideoHandler)).Methods("GET")
-	r.HandleFunc("/video-service/process", authHandler(processVideoHandler)).Methods("POST")
+	r.HandleFunc("/video/{id}", authHandler(videoHandler)).Methods("GET", "POST", "OPTIONS")
+	r.HandleFunc("/videos", authHandler(videosHandler)).Methods("GET", "OPTIONS")
+	r.HandleFunc("/video-service/upload", authHandler(uploadHandler)).Methods("PUT", "OPTIONS")
+	r.HandleFunc("/video-service/download/{id}", authHandler(downloadHandler)).Methods("GET", "OPTIONS")
+	r.HandleFunc("/video-service/browse/{id}", authHandler(browseVideoHandler)).Methods("GET", "OPTIONS")
+	r.HandleFunc("/video-service/process", authHandler(processVideoHandler)).Methods("POST", "OPTIONS")
 
 	//Sharelink
-	r.HandleFunc("/sharelink/{id}", generalHandler(sharelinkHandler)).Methods("GET")
-
+	r.HandleFunc("/sharelink/{id}", generalHandler(sharelinkHandler)).Methods("GET", "OPTIONS")
 	srv := &http.Server{
 		Handler: r,
 		Addr:    os.Getenv("HOST") + ":" + os.Getenv("PORT"),
