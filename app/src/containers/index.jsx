@@ -11,7 +11,9 @@ import VedioView from "./Vedio";
 import { Login, Register } from "./User";
 import apiHelper from "../services/api"
 
-console.log(apiHelper.request())
+apiHelper.videos("xssuio@gmail.com", "Abcd1234777")
+.then(console.log)
+.catch(console.error)
 
 const NavMenu = () => (
   <div>

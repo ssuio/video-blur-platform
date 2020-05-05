@@ -38,14 +38,14 @@ func generalHandler(f ViewFunc) ViewFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Headers", "'DNT, X-Mx-ReqToken, Keep-Alive, User-Agent, X-Requested-With, If-Modified-Since, Cache-Control, Content-Type, Authorization, Eztable-Api-Key'")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+		w.Header().Set("Content-Type", "application/json; charset=UTF-8; text/plain")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 
 		if r.Method == "OPTIONS" {
-			fmt.Fprintf(w, string("ok"))
+			fmt.Fprintf(w, "ok")
 			return
 		}
-		
+
 		f(w, r)
 		return
 	}
@@ -53,7 +53,7 @@ func generalHandler(f ViewFunc) ViewFunc {
 
 func authHandler(f ViewFunc) ViewFunc {
 	return generalHandler(func(w http.ResponseWriter, r *http.Request) {
-		var user model.User
+
 		session, err := store.Get(r, "vysioneer-assignment")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -65,17 +65,9 @@ func authHandler(f ViewFunc) ViewFunc {
 		if val != nil {
 			f(w, r)
 			return
-		}
-
-		// Auth user
-		user, err = auth.AuthUser(w, r)
-		if err != nil {
+		} else {
 			w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
 			w.WriteHeader(http.StatusUnauthorized)
-			return
-		} else {
-			session.Values["user"] = &user
-			f(w, r)
 			return
 		}
 	})
@@ -86,7 +78,29 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, string("ok"))
+	var user model.User
+	session, err := store.Get(r, "vysioneer-assignment")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Auth user
+	user, err = auth.AuthUser(w, r)
+	if err != nil {
+		w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	} else {
+		session.Values["user"] = user
+		err = session.Save(r, w)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		fmt.Fprintf(w, string("ok"))
+		return
+	}
 }
 
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
@@ -95,9 +109,7 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	fmt.Println("logout")
-	session.Values["user"] = &model.User{}
-	session.Options.MaxAge = -1
+	session.Values["user"] = nil
 
 	err = session.Save(r, w)
 	if err != nil {
@@ -498,7 +510,7 @@ func httpStart() {
 	//User
 	r.HandleFunc("/user", authHandler(userHandler)).Methods("GET", "OPTIONS")
 	r.HandleFunc("/user-service/register", generalHandler(registerHandler)).Methods("POST", "OPTIONS")
-	r.HandleFunc("/user-service/login", authHandler(loginHandler)).Methods("POST", "OPTIONS")
+	r.HandleFunc("/user-service/login", generalHandler(loginHandler)).Methods("POST", "OPTIONS")
 	r.HandleFunc("/user-service/logout", generalHandler(logoutHandler)).Methods("POST", "OPTIONS")
 
 	//Video
