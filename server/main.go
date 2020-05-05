@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -16,6 +15,7 @@ import (
 	"vysioneer-assignment/model"
 	"vysioneer-assignment/services"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	uuid "github.com/satori/go.uuid"
@@ -36,24 +36,24 @@ func init() {
 
 func generalHandler(f ViewFunc) ViewFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Headers", "'DNT, X-Mx-ReqToken, Keep-Alive, User-Agent, X-Requested-With, If-Modified-Since, Cache-Control, Content-Type, Authorization, Eztable-Api-Key'")
+		fmt.Println("Check UP")
+		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-		w.Header().Set("Content-Type", "application/json; charset=UTF-8; text/plain")
+		// w.Header().Set("Content-Type", "application/json; charset=UTF-8;")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 
 		if r.Method == "OPTIONS" {
+			fmt.Println("Check OPTIONS")
 			fmt.Fprintf(w, "ok")
 			return
 		}
-
 		f(w, r)
 		return
 	}
 }
 
 func authHandler(f ViewFunc) ViewFunc {
-	return generalHandler(func(w http.ResponseWriter, r *http.Request) {
-
+	return func(w http.ResponseWriter, r *http.Request) {
 		session, err := store.Get(r, "vysioneer-assignment")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -65,12 +65,12 @@ func authHandler(f ViewFunc) ViewFunc {
 		if val != nil {
 			f(w, r)
 			return
-		} else {
-			w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
-			w.WriteHeader(http.StatusUnauthorized)
-			return
 		}
-	})
+
+		w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
 }
 
 func healthHandler(w http.ResponseWriter, r *http.Request) {
@@ -91,16 +91,16 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
-	} else {
-		session.Values["user"] = user
-		err = session.Save(r, w)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		fmt.Fprintf(w, string("ok"))
+	}
+
+	session.Values["user"] = user
+	err = session.Save(r, w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	fmt.Fprintf(w, "ok")
+	return
 }
 
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
@@ -285,46 +285,46 @@ func videoHandler(w http.ResponseWriter, r *http.Request) {
 	video, _ := vs.GetVideo(id)
 
 	switch r.Method {
-		case "GET":     
-			jsonBytes, err := json.Marshal(video)
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte("500 - Something bad happened!"))
-				return
-			}
-			fmt.Fprintf(w, string(jsonBytes))
-		case "POST":
-			body, err := ioutil.ReadAll(r.Body)
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte("500 - Something bad happened!"))
-				return
-			}
-
-			paramVideo := model.Video{}
-			err = json.Unmarshal(body, &paramVideo)
-			if err != nil {
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte("500 - Video unmarshal failed.!"))
-				return
-			}
-
-			video.Perm = paramVideo.Perm
-			vs := services.GetVideoService()
-			err = vs.UpdateVideo(video)
-			if err != nil {
-				fmt.Println(err)
-				w.WriteHeader(http.StatusInternalServerError)
-				w.Write([]byte("500 - Update video failed."))
-				return
-			}
-			fmt.Fprintf(w, "")
-
-		default:
+	case "GET":
+		jsonBytes, err := json.Marshal(video)
+		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("500 - Something bad happened!"))
 			return
 		}
+		fmt.Fprintf(w, string(jsonBytes))
+	case "POST":
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("500 - Something bad happened!"))
+			return
+		}
+
+		paramVideo := model.Video{}
+		err = json.Unmarshal(body, &paramVideo)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("500 - Video unmarshal failed.!"))
+			return
+		}
+
+		video.Perm = paramVideo.Perm
+		vs := services.GetVideoService()
+		err = vs.UpdateVideo(video)
+		if err != nil {
+			fmt.Println(err)
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("500 - Update video failed."))
+			return
+		}
+		fmt.Fprintf(w, "")
+
+	default:
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("500 - Something bad happened!"))
+		return
+	}
 }
 
 func videosHandler(w http.ResponseWriter, r *http.Request) {
@@ -419,13 +419,13 @@ func processVideoHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("500 - Create video failed."))
-		return 
+		return
 	}
 
 	fmt.Fprintf(w, string("ok"))
 }
 
-func browseVideoHandler(w http.ResponseWriter, r *http.Request){
+func browseVideoHandler(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	videoID := params["id"]
 
@@ -460,7 +460,7 @@ func browseVideoHandler(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
-	http.ServeFile(w, r, os.Getenv("VIDEO_DIR") + videoID + ".mp4")
+	http.ServeFile(w, r, os.Getenv("VIDEO_DIR")+videoID+".mp4")
 }
 
 func sharelinkHandler(w http.ResponseWriter, r *http.Request) {
@@ -469,7 +469,7 @@ func sharelinkHandler(w http.ResponseWriter, r *http.Request) {
 	vs := services.GetVideoService()
 	video, _ := vs.GetVideo(id)
 
-	if video.Perm{
+	if video.Perm {
 		Openfile, err := os.Open(os.Getenv("VIDEO_DIR") + id + ".mp4")
 		defer Openfile.Close()
 		if err != nil {
@@ -492,26 +492,24 @@ func sharelinkHandler(w http.ResponseWriter, r *http.Request) {
 		Openfile.Seek(0, 0)
 		io.Copy(w, Openfile)
 		return
-	}else{
-		http.Error(w, "File not found.", 404)
-		return 
 	}
+
+	http.Error(w, "File not found.", 404)
+	return
 }
-
-
 
 func httpStart() {
 
 	r := mux.NewRouter()
 	fs := http.FileServer(http.Dir("./dist"))
 	r.Handle("/web/", http.StripPrefix("/web/", fs))
-	r.HandleFunc("/health", generalHandler(healthHandler))
+	r.HandleFunc("/health", healthHandler)
 
 	//User
 	r.HandleFunc("/user", authHandler(userHandler)).Methods("GET", "OPTIONS")
-	r.HandleFunc("/user-service/register", generalHandler(registerHandler)).Methods("POST", "OPTIONS")
-	r.HandleFunc("/user-service/login", generalHandler(loginHandler)).Methods("POST", "OPTIONS")
-	r.HandleFunc("/user-service/logout", generalHandler(logoutHandler)).Methods("POST", "OPTIONS")
+	r.HandleFunc("/user-service/register", registerHandler).Methods("POST", "OPTIONS")
+	r.HandleFunc("/user-service/login", loginHandler)
+	r.HandleFunc("/user-service/logout", logoutHandler).Methods("POST", "OPTIONS")
 
 	//Video
 	r.HandleFunc("/video/{id}", authHandler(videoHandler)).Methods("GET", "POST", "OPTIONS")
@@ -522,13 +520,13 @@ func httpStart() {
 	r.HandleFunc("/video-service/process", authHandler(processVideoHandler)).Methods("POST", "OPTIONS")
 
 	//Sharelink
-	r.HandleFunc("/sharelink/{id}", generalHandler(sharelinkHandler)).Methods("GET", "OPTIONS")
-	srv := &http.Server{
-		Handler: r,
-		Addr:    os.Getenv("HOST") + ":" + os.Getenv("PORT"),
-	}
+	r.HandleFunc("/sharelink/{id}", sharelinkHandler).Methods("GET", "OPTIONS")
 
-	log.Fatal(srv.ListenAndServe())
+	headers := handlers.AllowedHeaders([]string{"Set-Cookie", "X-Requested-With", "Content-Type", "authorization", "access-control-allow-origin", "Accept", "Content-Length", "Accept-Encoding", "X-CSRF-Token"})
+	origins := handlers.AllowedOrigins([]string{"http://localhost:8080"})
+	methods := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+	cred := handlers.AllowCredentials()
+	http.ListenAndServe("0.0.0.0:"+os.Getenv("PORT"), handlers.CORS(origins, headers, methods, cred)(r))
 }
 
 func main() {
