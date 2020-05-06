@@ -10,6 +10,7 @@ import {
 import VedioView from "./Vedio";
 import { Login, Register, Logout } from "./User";
 import DashboardView, { Dashboard } from "./Dashboard";
+import Entry from "./Entry"
 import apiHelper from "../services/api"
 
 const Page404 = () => <h1> Page 404 </h1>;
@@ -58,7 +59,7 @@ function App() {
       <div className="App">
         <Router>
           <Switch>
-            <Route path="/login" component={Login} />
+            <Route path="/entry" component={Entry} />
             <PrivateRoute path="/dashboard" component={Logout} />
             <Route path="*" exact={true} component={Page404} />
           </Switch>

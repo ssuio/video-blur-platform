@@ -13,14 +13,31 @@ class APIHelper {
     });
   }
 
-  login(acc, pass) {
+  login(payload) {
     return axios
       .post(
         "/user-service/login",
         {},
-        {auth: { username: acc, password: pass } }
+        {
+          auth: {
+            username: payload.account, 
+            password: payload.password
+          }
+        }
       )
       .then((r) => r.status === 200);
+  }
+
+  register(payload) {
+    return axios
+      .post(
+        "user-service/register",
+        {
+          email: payload.email,
+          name: payload.name,
+          password: payload.password
+        },
+      )
   }
 
   logout() {
