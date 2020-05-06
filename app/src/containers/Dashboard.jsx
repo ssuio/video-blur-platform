@@ -21,11 +21,11 @@ const NavMenu = () => (
     </div>
   );
 
-export const DashboardView = ()=>{
-    return (
-        <div>
-            <NavMenu />
-            <Logout />
-        </div>
-    )
+const Dashboard = (props) => {
+  return <div> 
+    This is dashbaord page
+    {props.children}  
+  </div>
 }
+
+export default Dashboard
