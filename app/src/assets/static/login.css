@@ -7,14 +7,22 @@
 -----------------------------------
 */
 
-
-		#pageWarpper{
+		#app{
 			background-image: url(../images/bg_login.jpg);
 			background-repeat: no-repeat;
 			background-size: cover;
 			background-position: left bottom;
 			min-height: 820px;
+			height: 100%;
 		}
+		/* #pageWarpper{
+			background-image: url(../images/bg_login.jpg);
+			background-repeat: no-repeat;
+			background-size: cover;
+			background-position: left bottom;
+			min-height: 820px;
+			height: 100%;
+		} */
 		/*=== Logo ===*/
 		#logoContainer{
 			position: absolute;
