@@ -1,0 +1,147 @@
+@charset "UTF-8";
+/*
+* @data 2020-5-6
+* VYSIONEER Noah Stylesheet
+-----------------------------------
+   Login
+-----------------------------------
+*/
+
+
+		#pageWarpper{
+			background-image: url(../images/bg_login.jpg);
+			background-repeat: no-repeat;
+			background-size: cover;
+			background-position: left bottom;
+			min-height: 820px;
+		}
+		/*=== Logo ===*/
+		#logoContainer{
+			position: absolute;
+			left: 40px;
+			top: 40px;
+		}
+		#logoContainer img{
+			width: 165px;
+		}
+		/*=== Content ===*/
+		#loginContentContainer{
+			background-color: rgba(11, 21, 41, .8);
+			width: calc( 80% - 130px );
+			max-width: 370px;
+			height: calc( 580px - 55px - 30px);
+			margin: 0 auto;
+			margin-top: 120px;
+			padding: 55px 65px 30px;
+			position: relative;
+		}
+		#tabContainer::after{
+			display: block;
+			content: "";
+			float: none;
+			clear: both;
+		}
+		#tabContainer .radioField{
+			margin-right: 50px;
+			float: left;
+		}
+		#tabContainer .radioField:last-child{
+			margin-right: 0;
+		}
+		#tabContainer .radioField input[type="radio"]{
+			display: none;
+			opacity: 0;
+		}
+		#tabContainer .radioField label{
+			font-size: 20px;
+			font-weight: 600;
+			cursor: pointer;
+			padding: 0 5px 10px;
+			opacity: .3;
+		}
+		#tabContainer .radioField label:hover{
+			opacity: .8;
+		}
+		#tabContainer .radioField input[type="radio"]:checked + label{
+			border-bottom: 3px solid #9CC6B9;
+			opacity: 1;
+		}
+		.formContent{
+			display: none;
+		}
+		.formContent.show{
+			display: block;
+		}
+		.btnEye{
+			width: 20px;
+			height: 20px;
+			background-image: url(../images/ic_eyeoff.svg);
+			background-repeat: no-repeat;
+			background-size: contain;
+			background-position: center;
+			cursor: pointer;
+			position: absolute;
+			right: 10px;
+			top: 32px;
+			opacity: .8;
+		}
+		.btnEye:hover{
+			opacity: 1;
+		}
+		.btnEye.open{
+			background-image: url(../images/ic_eye.svg);
+		}
+		input#loginPassword, input#registerPassword{
+			/* padding-right: 40px; */
+		}
+		.btnContainer{
+			position: absolute;
+			height: 140px;
+			bottom: 0;
+			width: calc( 100% - 130px );
+		}
+		.btnContainer button.btnStyle.sizeL{
+			width: 100%;
+		}
+
+		/*=== Form Login ===*/
+		#formLogin{
+			margin-top: 100px;
+		}
+		#formLogin .formContainer{
+			margin-bottom: 105px;
+		}
+		#formLogin .formField{
+			margin-bottom: 60px;
+		}
+		#formLogin .formField:last-child{
+			margin-bottom: 0;
+		}
+		
+		.btnContainer a{
+			color: #F0FAFF;
+			text-align: center;
+			display: block;
+			margin-top: 30px;
+			cursor: pointer;
+			opacity: .8;
+		}
+		.btnContainer a:hover{
+			opacity: 1;
+		}
+
+		/*=== Form Register ===*/
+		#formRegister{
+			margin-top: 50px;
+		}
+		#formRegister .formContainer{
+			margin-bottom: 105px;
+		}
+		#formRegister .formField{
+			margin-bottom: 35px;
+		}
+		#formRegister .formField:last-child{
+			margin-bottom: 0;
+		}
+
+		

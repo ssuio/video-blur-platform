@@ -75,7 +75,6 @@ export const Login = (props) => {
                 <Redirect to={{ pathname: "/dashboard", state: { user } }} />
             ) : (
                     <div>
-
                         <TextField
                             label="User Name"
                             name="account"

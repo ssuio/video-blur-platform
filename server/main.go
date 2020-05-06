@@ -144,7 +144,7 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, string("user"))
+	fmt.Fprintf(w, string("ok"))
 }
 
 func userHandler(w http.ResponseWriter, r *http.Request) {

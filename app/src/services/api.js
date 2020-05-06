@@ -35,7 +35,7 @@ class APIHelper {
         {
           email: payload.email,
           name: payload.name,
-          password: payload.password
+          password: payload.passwd
         },
       )
   }

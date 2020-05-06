@@ -62,9 +62,9 @@ function App() {
         <Router>
           <Switch>
             <Route path="/entry" component={Entry} />
-            {/* <PrivateRoute path="/dashboard" component={Logout} /> */}
+            <PrivateRoute path="/dashboard" component={Logout} />
 
-            <Route path="/dashboard/pannel" component={
+            {/* <Route path="/dashboard/pannel" component={
               ()=> {return (
                 <Dashboard>
                   <Pannel />
@@ -78,7 +78,7 @@ function App() {
                   <Upload />
                 </Dashboard>
               )}
-            } />
+            } /> */}
 
             <Route path="*" exact={true} component={Page404} />
           </Switch>
