@@ -3,8 +3,13 @@ import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
 import Box from '@material-ui/core/Box';
 import PropTypes from 'prop-types';
+import bgImage from 'assets/images/bg_login.jpg'
 
 import { Login, Register } from "./User"
+
+let bgStyle = {
+  backgroundImage: `url(${bgImage})`
+}
 
 const TabPanel = (props) => {
   const { children, value, index, ...other } = props;
@@ -50,7 +55,12 @@ const Entry = () => {
     setTabIndex(0);
   }
 
-  return <div>
+  return <div style={{
+    backgroundImage: `url(${bgImage})`,
+    backgroundRepeat: 'noRepeat',
+    minHeight: '820px',
+    height: '100vh',
+  }}>
     <div style={{
       position:'relative',
       left:'33%',
