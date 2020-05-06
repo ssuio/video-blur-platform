@@ -21,7 +21,7 @@ class APIHelper {
         {
           auth: {
             username: payload.account, 
-            password: payload.password
+            password: payload.passwd
           }
         }
       )

@@ -53,7 +53,7 @@ export const Login = (props) => {
 
     function handleLogin() {
         apiHelper
-            .login(account, passwd)
+            .login({account, passwd})
             .then(() => apiHelper.profile())
             .then((user) => {
                 console.log(user);
