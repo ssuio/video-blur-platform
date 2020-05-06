@@ -9,9 +9,11 @@ import {
 } from "react-router-dom";
 import VedioView from "./Vedio";
 import { Login, Register, Logout } from "./User";
-import DashboardView, { Dashboard } from "./Dashboard";
-import Entry from "./Entry"
-import apiHelper from "../services/api"
+import Dashboard from "./Dashboard";
+import Entry from "./Entry";
+import Upload from './Upload';
+import Pannel from './Pannel'
+import apiHelper from "../services/api";
 
 const Page404 = () => <h1> Page 404 </h1>;
 const Loading = () => <h1>Loading ... </h1>;
@@ -60,7 +62,24 @@ function App() {
         <Router>
           <Switch>
             <Route path="/entry" component={Entry} />
-            <PrivateRoute path="/dashboard" component={Logout} />
+            {/* <PrivateRoute path="/dashboard" component={Logout} /> */}
+
+            <Route path="/dashboard/pannel" component={
+              ()=> {return (
+                <Dashboard>
+                  <Pannel />
+                </Dashboard>
+              )}
+            } />
+
+            <Route path="/dashboard/upload" component={
+              ()=> {return (
+                <Dashboard>
+                  <Upload />
+                </Dashboard>
+              )}
+            } />
+
             <Route path="*" exact={true} component={Page404} />
           </Switch>
         </Router>
