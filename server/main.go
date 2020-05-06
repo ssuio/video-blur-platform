@@ -67,7 +67,7 @@ func authHandler(f ViewFunc) ViewFunc {
 			return
 		}
 
-		w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
+		// w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -88,12 +88,12 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	// Auth user
 	user, err = auth.AuthUser(w, r)
 	if err != nil {
-		w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
+		// w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 
-	session.Values["user"] = user
+	session.Values["user"] = &user
 	err = session.Save(r, w)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -523,7 +523,7 @@ func httpStart() {
 	r.HandleFunc("/sharelink/{id}", sharelinkHandler).Methods("GET", "OPTIONS")
 
 	headers := handlers.AllowedHeaders([]string{"Set-Cookie", "X-Requested-With", "Content-Type", "authorization", "access-control-allow-origin", "Accept", "Content-Length", "Accept-Encoding", "X-CSRF-Token"})
-	origins := handlers.AllowedOrigins([]string{"http://localhost:8080"})
+	origins := handlers.AllowedOrigins([]string{"http://localhost:8080", "http://localhost:9000"})
 	methods := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
 	cred := handlers.AllowCredentials()
 	http.ListenAndServe("0.0.0.0:"+os.Getenv("PORT"), handlers.CORS(origins, headers, methods, cred)(r))

@@ -1,12 +1,12 @@
-import React from "react";
+import React, {useState, useEffect} from "react";
 import apiHelper from "../services/api";
 
 export const Login = () => {
-    const [loading, setLoading] = React.useState(true);
-    const [isLogin, setLogin] = React.useState(false);
-    const [user, setUser] = React.useState({});
-    const [account, setAccount] = React.useState("");
-    const [passwd, setPasswd] = React.useState("");
+    const [loading, setLoading] = useState(true);
+    const [isLogin, setLogin] = useState(false);
+    const [user, setUser] = useState({});
+    const [account, setAccount] = useState("");
+    const [passwd, setPasswd] = useState("");
 
     const checkLogin = () => {
         apiHelper
@@ -23,7 +23,9 @@ export const Login = () => {
             });
     };
 
-    // checkLogin()
+    useEffect(()=>{
+        checkLogin()
+    })
 
     function login() {
         apiHelper
@@ -41,6 +43,7 @@ export const Login = () => {
         apiHelper
             .logout()
             .then(() => {
+                setUser({})
                 setLogin(false);
             })
             .catch(console.error);
@@ -56,7 +59,7 @@ export const Login = () => {
 
     return (
         <div>
-            {!loading ? isLogin ? (
+            {!loading && user.email ? (
                 <div>
                     <label>{user.name}</label>
                     <br />
@@ -84,7 +87,7 @@ export const Login = () => {
                     <br />
                     <button onClick={login}>Login</button>
                 </div>
-            ) : <h1>Loading</h1>}
+            )}
         </div>
     );
 };
