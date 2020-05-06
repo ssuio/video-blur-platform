@@ -26,7 +26,13 @@ type Video struct {
 	ImageUrl    string `json: "imageUrl"`
 	OwnerID     int
 	Perm        bool `json: "perm"`
+	Status      string `json: "status"`
 }
+
+const VideoStatusUpload = "uploaded"
+const VideoStatusProcessing = "processing"
+const VideoStatusDone = "done"
+const VideoStatusError = "error"
 
 // TODO 
 // type PermRule struct {
@@ -43,7 +49,7 @@ type DataProvider interface {
 	CreateUser(name, email, password, createdTime string) error
 	GetVideo(id string) (Video, error)
 	ListVideos(ownerID int) ([]Video, error)
-	CreateVideo(id string, ownerID int, name string, description string, size int64, createdTime string) error
+	CreateVideo(id string, status string, ownerID int, name string, description string, perm bool, size int64, createdTime string) error
 	UpdateVideo(video Video) error
 }
 
@@ -145,7 +151,7 @@ func (s SqliteProvider) ListVideos(ownerID int) ([]Video, error) {
 	}
 	defer db.Close()
 
-	rows, err := db.Query("SELECT id, owner_id, name, description, size, created_time FROM video WHERE owner_id=?", ownerID)
+	rows, err := db.Query("SELECT id, owner_id, status, name, description, perm, size, created_time FROM video WHERE owner_id=?", ownerID)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -153,29 +159,31 @@ func (s SqliteProvider) ListVideos(ownerID int) ([]Video, error) {
 
 	for rows.Next() {
 		video := Video{}
-		if err := rows.Scan(&video.ID, &video.OwnerID, &video.Name, &video.Description, &video.Size, &video.CreatedTime); err != nil {
+		var perm int
+		if err := rows.Scan(&video.ID, &video.OwnerID, &video.Status, &video.Name, &video.Description, &perm, &video.Size, &video.CreatedTime); err != nil {
 			return list, err
 		}
+		video.Perm = perm == 1
 		list = append(list, video)
 	}
 
 	return list, nil
 }
 
-func (s SqliteProvider) CreateVideo(id string, ownerID int, name string, description string, size int64, createdTime string) error {
+func (s SqliteProvider) CreateVideo(id string, status string, ownerID int, name string, description string, perm bool, size int64, createdTime string) error {
 	db, err := sql.Open("sqlite3", os.Getenv("SQLITE_FILE"))
 	if err != nil {
 		return err
 	}
 	defer db.Close()
 
-	stmt, err := db.Prepare("INSERT INTO video (id, owner_id, name, description, size, created_time ) VALUES (?, ?, ?, ?, ?, ?)")
+	stmt, err := db.Prepare("INSERT INTO video (id, status, owner_id, name, description, perm, size, created_time ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(id, ownerID, name, description, size, createdTime)
+	_, err = stmt.Exec(id, status, ownerID, name, description, perm, size, createdTime)
 	if err != nil {
 		return err
 	}
@@ -189,13 +197,13 @@ func (s SqliteProvider) UpdateVideo (video Video) error{
 	}
 	defer db.Close()
 
-	stmt, err := db.Prepare("UPDATE video SET name=?,description=?,owner_id=?,perm=? WHERE id=?")
+	stmt, err := db.Prepare("UPDATE video SET name=?,status=?,description=?,owner_id=?,perm=? WHERE id=?")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(video.Name, video.Description, video.OwnerID, video.Perm, video.ID)
+	_, err = stmt.Exec(video.Name, video.Status, video.Description, video.OwnerID, video.Perm, video.ID)
 	if err != nil {
 		return err
 	}

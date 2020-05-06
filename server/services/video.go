@@ -14,8 +14,8 @@ type VideoService struct {
 
 func (vs VideoService) UploadVideo() {}
 
-func (vs VideoService) CreateVideo(id string, ownerID int, name string, description string, size int64, createdTime string) error {
-	return vs.dataManager.CreateVideo(id, ownerID, name, description, size, createdTime)
+func (vs VideoService) CreateVideo(id string, status string, ownerID int, name string, description string, perm bool, size int64, createdTime string) error {
+	return vs.dataManager.CreateVideo(id, status, ownerID, name, description, perm, size, createdTime)
 }
 
 func (vs VideoService) UpdateVideo(video model.Video) error {

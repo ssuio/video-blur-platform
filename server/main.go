@@ -32,6 +32,7 @@ func init() {
 	os.MkdirAll(os.Getenv("TMP_DIR"), os.ModePerm)
 	os.MkdirAll(os.Getenv("VIDEO_DIR"), os.ModePerm)
 
+	job.GetJobManager().Run()
 }
 
 func generalHandler(f ViewFunc) ViewFunc {
@@ -177,17 +178,29 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(32 << 20)
+	newName := r.FormValue("name")
+	description := r.FormValue("description")
+	perm, err := strconv.ParseBool(r.FormValue("perm"))
 
-	file, fileHandler, err := r.FormFile("file")
-
+	// funcType := r.FormValue("type")
+	file, _, err := r.FormFile("file")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("500 - Something bad happened!"))
+		return
 	}
 	defer file.Close()
 
 	videoID := uuid.NewV4().String()
-	f, err := os.OpenFile(os.Getenv("VIDEO_DIR")+videoID+".mp4", os.O_WRONLY|os.O_CREATE, 0666)
+	fmt.Println("Uploaded " + videoID)
+	f, err := os.OpenFile(os.Getenv("TMP_DIR")+videoID+".mp4", os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("500 - Write tmp file failed!"))
+		return
+	}
+
 	io.Copy(f, file)
 	fi, _ := f.Stat()
 
@@ -203,16 +216,37 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	if user, ok = val.(*model.User); !ok {
 		// Handle the case that it's not an expected type
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("500 - Something bad happened!"))
+		w.Write([]byte("500 - User error!"))
 		return
 	}
 
 	vs := services.GetVideoService()
 	fmt.Printf("filesize %d\n", fi.Size())
-	err = vs.CreateVideo(videoID, user.ID, fileHandler.Filename, "", fi.Size(), time.Now().String())
+	fmt.Printf("status %s\n", model.VideoStatusUpload)
+	err = vs.CreateVideo(videoID, model.VideoStatusUpload, user.ID, newName, description, perm, fi.Size(), time.Now().String())
 	if err != nil {
+		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("500 - Something bad happened!"))
+		w.Write([]byte("500 - Create video failed."))
+		return
+	}
+
+	// Add job
+	video, err := vs.GetVideo(videoID)
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("500 - Get video failed."))
+		return
+	}
+
+	jm := job.GetJobManager()
+	err = jm.AddFaceBlurVideoJob(video)
+	if err != nil {
+		fmt.Println(err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("500 - Add video job failed."))
+		return
 	}
 
 	fmt.Fprintf(w, string("ok"))
@@ -347,6 +381,7 @@ func videosHandler(w http.ResponseWriter, r *http.Request) {
 	vs := services.GetVideoService()
 	videos, err := vs.ListVideos(user.ID)
 	if err != nil {
+		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("500 - Something bad happened!"))
 		return
@@ -362,68 +397,77 @@ func videosHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func processVideoHandler(w http.ResponseWriter, r *http.Request) {
-	r.ParseMultipartForm(32 << 20)
-	newName := r.FormValue("name")
-	description := r.FormValue("description")
+// func processVideoHandler(w http.ResponseWriter, r *http.Request) {
+// 	if job.InUse {
+// 		fmt.Fprintf(w, "Video processing is in used.")
+// 		return
+// 	}
 
-	// funcType := r.FormValue("type")
-	file, _, err := r.FormFile("file")
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("500 - Something bad happened!"))
-		return
-	}
-	defer file.Close()
+// 	r.ParseMultipartForm(32 << 20)
+// 	newName := r.FormValue("name")
+// 	description := r.FormValue("description")
 
-	videoID := uuid.NewV4().String()
-	fmt.Println("Processing " + videoID)
-	f, err := os.OpenFile(os.Getenv("TMP_DIR")+videoID+".mp4", os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		fmt.Println(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("500 - Write tmp file failed!"))
-		return
-	}
+// 	// funcType := r.FormValue("type")
+// 	file, _, err := r.FormFile("file")
+// 	if err != nil {
+// 		w.WriteHeader(http.StatusInternalServerError)
+// 		w.Write([]byte("500 - Something bad happened!"))
+// 		return
+// 	}
+// 	defer file.Close()
 
-	io.Copy(f, file)
-	fi, _ := f.Stat()
+// 	videoID := uuid.NewV4().String()
+// 	fmt.Println("Processing " + videoID)
+// 	f, err := os.OpenFile(os.Getenv("TMP_DIR")+videoID+".mp4", os.O_WRONLY|os.O_CREATE, 0666)
+// 	if err != nil {
+// 		fmt.Println(err)
+// 		w.WriteHeader(http.StatusInternalServerError)
+// 		w.Write([]byte("500 - Write tmp file failed!"))
+// 		return
+// 	}
 
-	// Processing video
-	err = job.FaceBlurHandler(videoID)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("500 - Face blur failed"))
-		return
-	}
+// 	io.Copy(f, file)
+// 	fi, _ := f.Stat()
 
-	//Record video meta
-	session, err := store.Get(r, "vysioneer-assignment")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	val := session.Values["user"]
-	var user = &model.User{}
-	var ok bool
-	if user, ok = val.(*model.User); !ok {
-		// Handle the case that it's not an expected type
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("500 - User error!"))
-		return
-	}
+// 	// Processing video
+// 	err = job.FaceBlurHandler(videoID)
+// 	if err == job.ErrorOnUsed {
+// 		fmt.Fprintf(w, string("Video processing is in used."))
+// 		return
+// 	} else if err != nil {
+// 		w.WriteHeader(http.StatusInternalServerError)
+// 		w.Write([]byte("500 - Face blur failed"))
+// 		return
+// 	}
 
-	vs := services.GetVideoService()
-	fmt.Printf("filesize %d\n", fi.Size())
-	err = vs.CreateVideo(videoID, user.ID, newName, description, fi.Size(), time.Now().String())
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("500 - Create video failed."))
-		return
-	}
+// 	//Record video meta
+// 	session, err := store.Get(r, "vysioneer-assignment")
+// 	if err != nil {
+// 		http.Error(w, err.Error(), http.StatusInternalServerError)
+// 		return
+// 	}
+// 	val := session.Values["user"]
+// 	var user = &model.User{}
+// 	var ok bool
+// 	if user, ok = val.(*model.User); !ok {
+// 		// Handle the case that it's not an expected type
+// 		w.WriteHeader(http.StatusInternalServerError)
+// 		w.Write([]byte("500 - User error!"))
+// 		return
+// 	}
 
-	fmt.Fprintf(w, string("ok"))
-}
+// 	vs := services.GetVideoService()
+// 	fmt.Printf("filesize %d\n", fi.Size())
+// 	err = vs.CreateVideo(videoID, user.ID, newName, description, fi.Size(), time.Now().String())
+// 	if err != nil {
+// 		fmt.Println(err)
+// 		w.WriteHeader(http.StatusInternalServerError)
+// 		w.Write([]byte("500 - Create video failed."))
+// 		return
+// 	}
+
+// 	fmt.Fprintf(w, string("ok"))
+// }
 
 func browseVideoHandler(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -514,10 +558,10 @@ func httpStart() {
 	//Video
 	r.HandleFunc("/video/{id}", authHandler(videoHandler)).Methods("GET", "POST", "OPTIONS")
 	r.HandleFunc("/videos", authHandler(videosHandler)).Methods("GET", "OPTIONS")
-	r.HandleFunc("/video-service/upload", authHandler(uploadHandler)).Methods("PUT", "OPTIONS")
+	r.HandleFunc("/video-service/upload", authHandler(uploadHandler)).Methods("POST", "OPTIONS")
 	r.HandleFunc("/video-service/download/{id}", authHandler(downloadHandler)).Methods("GET", "OPTIONS")
 	r.HandleFunc("/video-service/browse/{id}", authHandler(browseVideoHandler)).Methods("GET", "OPTIONS")
-	r.HandleFunc("/video-service/process", authHandler(processVideoHandler)).Methods("POST", "OPTIONS")
+	// r.HandleFunc("/video-service/process", authHandler(processVideoHandler)).Methods("POST", "OPTIONS")
 
 	//Sharelink
 	r.HandleFunc("/sharelink/{id}", sharelinkHandler).Methods("GET", "OPTIONS")
