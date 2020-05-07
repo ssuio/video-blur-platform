@@ -147,8 +147,7 @@ const Entry = () => {
     };
 
     return (
-        <div>
-            <div id="pageWarpper">
+            <div id="entryPageWarpper">
                 <div id="logoContainer">
                     <img src={icLogoFull} title="VYSIONEER" />
                 </div>
@@ -178,7 +177,6 @@ const Entry = () => {
                     {tabIndex == 0 ? <Login /> : <Register />}
                 </div>
             </div>
-        </div>
     );
 };
 

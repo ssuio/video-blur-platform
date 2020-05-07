@@ -1,0 +1,291 @@
+@charset "UTF-8";
+/*
+* @data 2020-5-7
+* VYSIONEER Noah Stylesheet
+-----------------------------------
+   List
+-----------------------------------
+*/
+
+
+		#uploadPageContent header{
+			font-size: 22px;
+			font-weight: 600;
+		}
+		#listTableBtnContainer{
+			position: absolute;
+			right: 60px;
+			top: 110px;
+		}
+		#listTableBtnContainer button{
+			float: left;
+			margin-right: 15px;
+		}
+		#listTableBtnContainer button:last-child{
+			margin-right: 0;
+		}
+		#listTable{
+			margin-top: 40px;
+		}
+		.listRow{
+			position: relative;
+			width: 100%;
+			border-bottom: 1px solid rgba(151, 151, 151, .5);
+		}
+		.listRow:nth-child(even){
+			background-color: rgba(11, 21, 41, .2);
+		}
+		.listRow.select{
+			background-color: rgba(156, 198, 185, .1);
+		}
+		.listRow::after, .mainContent::after{
+			display: block;
+			content: "";
+			clear: both;
+			float: none;
+		}
+		.listRow.title{
+			font-size: 16px;
+			font-weight: 600;
+			text-align: center;
+			border-bottom: 1px solid rgba(151, 151, 151, 1);
+		}
+		.listCell{
+			float: left;
+			height: 60px;
+			line-height: 60px;
+		}
+		/*===============================
+			Main Content
+		================================*/
+		/*=== Cell Checkbox ==*/
+		.listRow .listCell.cellCheckbox{
+			width: 60px;
+		}
+		.listRow .listCell.cellCheckbox .checkboxField label{
+			margin: 14px auto 0;
+		}
+		/*=== Cell Date ==*/
+		.listRow .listCell.cellDate{
+			width: 140px;
+			text-align: center;
+			font-size: 18px;
+		}
+		/*=== Cell FileName ==*/
+		.listRow .listCell.cellFileName{
+			position: relative;
+			width: calc( 100% - 60px - 140px - 92px - 120px - 140px - 64px - 60px);
+		}
+		.listRow.title .cellFileName{
+			text-align: left;
+		}
+		.listRow .listCell.cellFileName input[type="text"]{
+			outline: none;
+			appearance: none;
+			border: 0;
+			background-color: rgba(255, 255, 255, 0);
+			font-size: 18px;
+			color: #F0FAFF;
+			opacity: 1;
+			height: 40px;
+			line-height: 40px;
+			width: 100%;
+			padding: 10px;
+			margin-top: 9px;
+			border: 1px solid #F0FAFF;
+		}
+		.listRow .listCell.cellFileName input[type="text"]:disabled{
+			outline: none;
+			appearance: none;
+			border: 0;
+			background-color: rgba(255, 255, 255, 0);
+			font-size: 18px;
+			color: #F0FAFF;
+			opacity: 1;
+			height: 60px;
+			line-height: 60px;
+			padding: 0;
+			margin-top: 0;
+		}
+		/*=== Cell Public ==*/
+		.listRow .listCell.cellPublic{
+			width: 92px;
+		}
+		.listRow .listCell.cellPublic .switchField label{
+			margin-left: 15px;
+			margin-top: 13px;
+		}
+		/*=== Cell Size ==*/
+		.listRow.title .listCell.cellSize{
+			color: #F0FAFF;
+		}
+		.listRow .listCell.cellSize{
+			color: #7B8390;
+			text-align: center;
+			width: 120px;
+		}
+		/*=== Cell Status ==*/
+		.listRow .listCell.cellStatus{
+			text-align: center;
+			width: 140px;
+		}
+		.listRow .listCell.cellStatus.loading{
+			color: #7B8390;
+		}
+		.listRow .listCell.cellStatus.error{
+			color: #FF5C5C;
+		}
+		/*=== Cell Edit ==*/
+		.listRow .listCell.cellEdit{
+			width: 64px;
+		}
+		.editIconContainer{
+			width: 24px;
+			height: 24px;
+			background-image: url(../images/ic_edit.svg);
+			background-repeat: no-repeat;
+			background-size: contain;
+			background-position: center;
+			margin: 0 auto;
+			cursor: pointer;
+			opacity: .8;
+			margin-top: 18px;
+		}
+		.editIconContainer:hover{
+			opacity: 1;
+		}
+		.editIconContainer.save{
+			background-image: url(../images/ic_save.svg);
+		}
+		/*=== Cell Btn ==*/
+		.listRow .listCell.cellBtn{
+			width: 60px;
+		}
+		.cellBtnContainer{
+			width: 30px;
+			height: 30px;
+			border-radius: 50%;
+			border: 1px solid #F0FAFF;
+			background-image: url(../images/ic_smallarrow_white.svg);
+			background-repeat: no-repeat;
+			background-size: 15px;
+			background-position: center;
+			margin: 0 auto;
+			cursor: pointer;
+			opacity: .8;
+			margin-top: 15px;
+		}
+		.cellBtnContainer:hover{
+			opacity: 1;
+		}
+		.cellBtnContainer.open{
+			background-color: #F0FAFF;
+			background-image: url(../images/ic_smallarrow_black.svg);
+		}
+
+		/*===============================
+			Sub Content
+		================================*/
+		.subContent{
+			padding-left: 60px;
+			padding-right: 124px;
+			position: relative;
+			margin-top: 20px;
+			padding-bottom: 25px;
+			display: none;
+		}
+		.subContent.show{
+			display: block;
+		}
+		.subListRow{
+			position: relative;
+			width: 100%;
+			margin-bottom: 15px;
+		}
+		.subListRow:last-child{
+			margin-bottom: 0;
+		}
+		.subListRow::after{
+			display: block;
+			content: "";
+			clear: both;
+			float: none;
+		}
+		.subListCell{
+			float: left;
+		}
+		.subListCell.subListTitle{
+			width: 140px;
+			text-align: center;
+			font-weight: 600;
+		}
+		/*=== Row Notes ==*/
+		.rowNotes{
+			color: #7B8390;
+		}
+		.rowNotes .notesTextarea{
+			width: calc( 100% - 140px );
+		}
+		.rowNotes textarea{
+			overflow-y: auto;
+			width: 100%;
+			outline: none;
+			border: 0;
+			font-size: 16px;
+			background-color: rgba(255, 255, 255, 0);
+			color: #F0FAFF;
+			padding: 10px;
+			letter-spacing: 0.1em;
+			line-height: 1.5;
+			border: 1px solid #F0FAFF;
+		}
+		.rowNotes textarea:disabled{
+			opacity: 1;
+			overflow-y: auto;
+			width: 100%;
+			outline: none;
+			border: 0;
+			color: #7B8390;
+			padding: 0;
+			letter-spacing: 0.1em;
+			line-height: 1.5;
+		}
+		/*=== Row Link ==*/
+		.rowLink .subListTitle{
+			height: 40px;
+			line-height: 40px;
+		}
+		.rowLink .linkInput{
+			width: calc( 100% - 140px);
+			position: relative;
+		}
+		.rowLink input[type="text"]{
+			outline: none;
+			appearance: none;
+			border: 0;
+			background-color: rgba(255, 255, 255, 0);
+			font-size: 16px;
+			color: #F0FAFF;
+			border: 1px solid #F0FAFF;
+			height: 40px;
+			line-height: 40px;
+			width: 50%;
+			padding: 0 10px;
+			float: left;
+		}
+		.linkCopyBtn{
+			width: 40px;
+			height: 40px;
+			border: 1px solid #F0FAFF;
+			border-left: 0;
+			background-image: url(../images/ic_copy.svg);
+			background-repeat: no-repeat;
+			background-size: 20px;
+			background-position: center;
+			box-sizing: border-box;
+			cursor: pointer;
+			float: left;
+		}
+		.linkCopyBtn:hover{
+			background-color: rgba(240, 250, 255, .1);
+		}

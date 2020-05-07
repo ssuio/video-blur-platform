@@ -4,12 +4,11 @@ import {
   BrowserRouter as Router,
   Switch,
   Route,
-  Link,
   Redirect,
 } from "react-router-dom";
-import { Login, Register, Logout } from "./User";
 import Entry from "./Entry";
 import apiHelper from "../services/api";
+import {Dashboard} from "./Dashboard";
 
 const Page404 = () => <h1> Page 404 </h1>;
 const Loading = () => <h1>Loading ... </h1>;
@@ -57,7 +56,7 @@ function App() {
         <Router>
           <Switch>
             <Route path="/entry" component={Entry} />
-            <PrivateRoute path="/dashboard" component={Logout} />
+            <PrivateRoute path="/dashboard" component={Dashboard} />
             <Route path="*" exact={true} component={Page404} />
           </Switch>
         </Router>
