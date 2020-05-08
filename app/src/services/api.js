@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const {
-  API_HOST = 'http://localhost:9000'
+  API_HOST = 'https://api.ezsofa.com'
 } = process.env;
 
 axios.defaults.baseURL = `${API_HOST}`;
