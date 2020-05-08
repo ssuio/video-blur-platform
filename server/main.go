@@ -375,16 +375,10 @@ func videoHandler(w http.ResponseWriter, r *http.Request) {
 		err = os.Remove(os.Getenv("VIDEO_DIR") + video.ID + ".mp4")
 		if err != nil {
 			fmt.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("500 - Delete video failed."))
-			return
 		}
 		err = os.Remove(os.Getenv("TMP_DIR") + video.ID + ".mp4")
 		if err != nil {
 			fmt.Println(err)
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("500 - Delete video failed."))
-			return
 		}
 		fmt.Println("Delete " + video.ID)
 		fmt.Fprintf(w, "")
@@ -590,7 +584,7 @@ func httpStart() {
 	r.HandleFunc("/user-service/logout", logoutHandler).Methods("POST", "OPTIONS")
 
 	//Video
-	r.HandleFunc("/video/{id}", authHandler(videoHandler)).Methods("GET", "POST", "OPTIONS", "DELETE")
+	r.HandleFunc("/video/{id}", authHandler(videoHandler)).Methods("GET", "POST", "DELETE", "OPTIONS")
 	r.HandleFunc("/videos", authHandler(videosHandler)).Methods("GET", "OPTIONS")
 	r.HandleFunc("/video-service/transfer", authHandler(transferHandler)).Methods("POST", "OPTIONS")
 	r.HandleFunc("/video-service/download/{id}", authHandler(downloadHandler)).Methods("GET", "OPTIONS")
@@ -602,7 +596,7 @@ func httpStart() {
 
 	headers := handlers.AllowedHeaders([]string{"Set-Cookie", "X-Requested-With", "Content-Type", "authorization", "access-control-allow-origin", "Accept", "Content-Length", "Accept-Encoding", "X-CSRF-Token"})
 	origins := handlers.AllowedOrigins([]string{"http://localhost:8080", "https://localhost:8080", "http://localhost:9000", "https://localhost:9000", "https://web.ezsofa.com", "http://web.ezsofa.com"})
-	methods := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+	methods := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS", "DELETE"})
 	cred := handlers.AllowCredentials()
 	log.Fatal(http.ListenAndServe("0.0.0.0:"+os.Getenv("PORT"), handlers.CORS(origins, headers, methods, cred)(r)))
 }

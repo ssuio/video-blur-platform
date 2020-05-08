@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import icLogoIcon from "assets/images/ic_logo_icon.svg";
 import icUser from "assets/images/ic_user.svg";
-import VideoList from "../containers/VedioList";
+import VideoList from "../containers/VideoList";
 import VideoTransfer from "../containers/VideoTransfer";
 import apiHelper from "../services/api";
 

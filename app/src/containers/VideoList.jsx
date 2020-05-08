@@ -3,32 +3,11 @@ import apiHelper from "../services/api";
 
 
 const ListRow = (props) => {
-    // const [video, setVideo] = useState({});
-    // const [status, setStatus] = useState("");
-
-    // useEffect(() => {
-    //     let tV = props.video;
-    //     setVideo({
-    //         id: tV.id,
-    //         name: tV.name,
-    //         description: tV.description,
-    //         size: tV.Size,
-    //         createdTime: tV.CreatedTime,
-    //         imageUrl: tV.ImageUrl,
-    //         ownerID: tV.OwnerID,
-    //         perm: tV.perm,
-    //         status: tV.Status,
-    //     });
-    //     if (props.video.id == "1") {
-    //         console.log(`id 1 set status ${tV.Status}`);
-    //     }
-    //     setStatus(tV.Status);
-    // }, []);
-    const [perm, setPerm] = useState(props.video.Perm)
-    const [openSubContent, setOpenSubContent] = useState(false)
-    const [isEditable, setEditable] = useState(false)
-    const [isVideoCheck, setVideoCheck] = useState(props.videoCheckList[props.videoIdx])
-    const videoIdx = props.videoIdx
+    const [perm, setPerm] = useState(props.video.Perm);
+    const [openSubContent, setOpenSubContent] = useState(false);
+    const [isEditable, setEditable] = useState(false);
+    const [isCHecked, setChecked] = useState(false);
+    const videoIdx = props.videoIdx;
 
     const toDate = (date) => {
         date = new Date(date);
@@ -40,8 +19,8 @@ const ListRow = (props) => {
     const handleVideoCheck = (e) => {
         let checked = e.target.checked;
         console.log(`set video ${videoIdx} check ${checked}`)
-        setVideoCheck(checked)
-        props.videoCheckList[videoIdx] = checked;
+        setChecked(e.target.checked)
+        props.updateVideoCheckList(videoIdx, checked)
     }
 
     const handleSharelink = (e) => {
@@ -80,11 +59,11 @@ const ListRow = (props) => {
                         <input
                             type="checkbox"
                             name={'tableFileList' + videoIdx}
-                            id={'tableListRow1' + videoIdx}
-                            // onChange={handleVideoCheck}
-                            // checked={isVideoCheck}
+                            id={'tableListRow' + videoIdx}
+                            onChange={handleVideoCheck}
+                            checked={isCHecked}
                         />
-                        <label htmlFor="tableListRow1"></label>
+                        <label htmlFor={'tableListRow' + videoIdx}></label>
                     </div>
                 </div>
                 <div className="listCell cellDate">
@@ -115,8 +94,8 @@ const ListRow = (props) => {
                     <div className="subListCell subListTitle">Notes</div>
                     <div className="subListCell notesTextarea">
                         <textarea
-                            name="tableNotes1"
-                            id="tableNotes1"
+                            name={`tableNotes${videoIdx}`}
+                            id={`tableNotes${videoIdx}`}
                             rows="2"
                             defaultValue={props.video.description}
                             disabled={!isEditable}
@@ -139,7 +118,7 @@ const ListRow = (props) => {
     );
 };
 
-const VedioList = (props) => {
+const VideoList = (props) => {
     const [videoList, setVideoList] = useState([]);
     const [videoCheckList, setVideoCheckList] = useState([]);
 
@@ -151,17 +130,21 @@ const VedioList = (props) => {
     };
 
     const deleteVideo = async () => {
-        console.log(videoCheckList);
-        for (let idx in videoCheckList) {
-            console.log(`check ${idx}`);
-            if (videoCheckList[idx]) {
-                console.log("delete");
-                console.log(videoList);
-                console.log(idx);
-                // await apiHelper.deleteVideo(videoList[v])
+        let checkList = [...videoCheckList];
+        let _videoList = [...videoList];
+        for (let idx in checkList) {
+            if (checkList[idx]) {
+                await apiHelper.deleteVideo(_videoList[idx].id)
             }
         }
+        refreshVideoList();
     };
+
+    const updateVideoCheckList = (idx, val) => {
+        let list = videoCheckList;
+        list[idx] = val;
+        setVideoCheckList(list)
+    }
 
     useEffect(refreshVideoList, []);
 
@@ -195,11 +178,11 @@ const VedioList = (props) => {
                         <div className="listCell cellBtn"> </div>
                     </div>
                     {videoList.map((v, idx) => {
-                        console.log("map " + idx);
                         return (
                             <ListRow
                                 key={idx}
                                 video={v}
+                                updateVideoCheckList={updateVideoCheckList}
                                 videoCheckList={videoCheckList}
                                 videoIdx={idx}
                             />
@@ -211,4 +194,4 @@ const VedioList = (props) => {
     );
 };
 
-export default VedioList;
+export default VideoList;
