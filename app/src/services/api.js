@@ -4,7 +4,7 @@ const {
   API_HOST='api.ezsofa.com'
 } = process.env;
 
-axios.defaults.baseURL = `http://${API_HOST}`;
+axios.defaults.baseURL = `https://${API_HOST}`;
 // axios.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
 axios.defaults.withCredentials = true;
 // axios.defaults.crossDomain = true;

@@ -10,6 +10,7 @@ import (
 	"os"
 	"strconv"
 	"time"
+	"log"
 	"vysioneer-assignment/auth"
 	"vysioneer-assignment/job"
 	"vysioneer-assignment/model"
@@ -567,10 +568,10 @@ func httpStart() {
 	r.HandleFunc("/sharelink/{id}", sharelinkHandler).Methods("GET", "OPTIONS")
 
 	headers := handlers.AllowedHeaders([]string{"Set-Cookie", "X-Requested-With", "Content-Type", "authorization", "access-control-allow-origin", "Accept", "Content-Length", "Accept-Encoding", "X-CSRF-Token"})
-	origins := handlers.AllowedOrigins([]string{"http://localhost:8080", "http://localhost:9000", "http://vysioneer-web-1755721854.ap-northeast-1.elb.amazonaws.com", "http://web.ezsofa.com"})
+	origins := handlers.AllowedOrigins([]string{"https://localhost:8080", "https://localhost:9000", "https://web.ezsofa.com", "https://web.ezsofa.com"})
 	methods := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
 	cred := handlers.AllowCredentials()
-	http.ListenAndServe("0.0.0.0:"+os.Getenv("PORT"), handlers.CORS(origins, headers, methods, cred)(r))
+	log.Fatal(http.ListenAndServeTLS("0.0.0.0:"+os.Getenv("PORT"), "./ssl/cert.pem", "./ssl/private.pem", handlers.CORS(origins, headers, methods, cred)(r)))
 }
 
 func main() {
