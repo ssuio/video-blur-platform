@@ -62,12 +62,6 @@ module.exports = {
     compress: true,
     historyApiFallback: true,
     hot: true,
-    disableHostCheck: true,
-    http2: true,
-    https: {
-      key: fs.readFileSync('./ssl/private.pem'),
-      cert: fs.readFileSync('./ssl/cert.pem'),
-      ca: fs.readFileSync('./ssl/bundle.pem'),
-    }
+    disableHostCheck: true
   },
 };
