@@ -9,18 +9,19 @@ services:
       - ./server/data:/data
       - /var/run/docker.sock:/var/run/docker.sock
     environment: 
-        PORT: 9000
-        HOST: 0.0.0.0
-        HOST_DATA_DIR: /Users/noahchou/workspace/vysioneer-assignment/server/data
-        DATA_DIR: /data
-        SQLITE_FILE: /data/vysioneer.db
-        VIDEO_DIR: /data/videos/
-        TMP_DIR: /data/tmp/
-        SESSION_KEY: ssuio
+      PORT: 9000
+      HOST: 0.0.0.0
+      HOST_DATA_DIR: /home/ssuio/vysioneer-assignment/server/data
+      DATA_DIR: /data
+      SQLITE_FILE: /data/vysioneer.db
+      VIDEO_DIR: /data/videos/
+      TMP_DIR: /data/tmp/
+      SESSION_KEY: ssuio
   vysioneer-assignment-app:
     container_name: vysioneer-app
     image: vysioneer-assignment-app
     ports:
       - 8080:8080
     environment: 
-        API_HOST: api.ezsofa.com
+      API_HOST: api.ezsofa.com
+      NODE_ENV: production  
