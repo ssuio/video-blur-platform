@@ -1,10 +1,10 @@
 import axios from "axios";
 
 const {
-  API_HOST='api.ezsofa.com'
+  API_HOST = 'https://api.ezsofa.com'
 } = process.env;
 
-axios.defaults.baseURL = `https://${API_HOST}`;
+axios.defaults.baseURL = `${API_HOST}`;
 // axios.defaults.headers.post["Content-Type"] = "application/x-www-form-urlencoded";
 axios.defaults.withCredentials = true;
 // axios.defaults.crossDomain = true;
@@ -24,7 +24,7 @@ class APIHelper {
         {},
         {
           auth: {
-            username: payload.account, 
+            username: payload.account,
             password: payload.passwd
           }
         }
@@ -60,6 +60,14 @@ class APIHelper {
 
   videos() {
     return axios.get(`/videos`).then((r) => r.data);
+  }
+
+  updateVideo(id, data) {
+    return axios.post(`/video/${id}`, data).then(r => r.data)
+  }
+
+  deleteVideo(id) {
+    return axios.delete(`/video/${id}`).then(r => r.data)
   }
 
   processVideo(name, desc, file) {

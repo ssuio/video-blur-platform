@@ -354,7 +354,10 @@ func videoHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		fmt.Fprintf(w, "")
-
+	case "DELETE":
+		// TODO
+		fmt.Println("Delete " + video.ID)
+		fmt.Fprintf(w, "")
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("500 - Something bad happened!"))
@@ -568,7 +571,7 @@ func httpStart() {
 	r.HandleFunc("/sharelink/{id}", sharelinkHandler).Methods("GET", "OPTIONS")
 
 	headers := handlers.AllowedHeaders([]string{"Set-Cookie", "X-Requested-With", "Content-Type", "authorization", "access-control-allow-origin", "Accept", "Content-Length", "Accept-Encoding", "X-CSRF-Token"})
-	origins := handlers.AllowedOrigins([]string{"https://localhost:8080", "https://localhost:9000", "https://web.ezsofa.com", "https://web.ezsofa.com"})
+	origins := handlers.AllowedOrigins([]string{"http://localhost:8080", "https://localhost:8080", "http://localhost:9000", "https://localhost:9000", "https://web.ezsofa.com", "https://web.ezsofa.com"})
 	methods := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
 	cred := handlers.AllowCredentials()
 	log.Fatal(http.ListenAndServe("0.0.0.0:"+os.Getenv("PORT"), handlers.CORS(origins, headers, methods, cred)(r)))

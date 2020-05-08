@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import { Redirect } from "react-router-dom";
 import icLogoFull from "assets/images/ic_logo_full.png";
 import apiHelper from "../services/api";
 
 const Login = () => {
     const [account, setAccount] = useState("");
     const [passwd, setPasswd] = useState("");
+    const [isLogin, setLogin] = useState(false);
     const inputTable = {
         loginUsername: setAccount,
         loginPassword: setPasswd,
@@ -21,46 +23,46 @@ const Login = () => {
         apiHelper
             .login({ account, passwd })
             .then(() => apiHelper.profile())
-            .then((user) => {
-                console.log(user);
-                setUser(user);
-            })
+            .then(() => setLogin(true))
             .catch(console.error);
     }
 
     return (
-        <div id="formLogin" className="formContent show">
-            <div className="formContainer">
-                <div className="formField dynamic">
-                    <input
-                        type="text"
-                        name="loginUsername"
-                        id="loginUsername"
-                        placeholder="Username"
-                        autoComplete="off"
-                        onChange={onInputChange}
-                    />
-                    <label htmlFor="loginUsername">Email</label>
+        <div>
+            {!isLogin ? (<div id="formLogin" className="formContent show">
+                <div className="formContainer">
+                    <div className="formField dynamic">
+                        <input
+                            type="text"
+                            name="loginUsername"
+                            id="loginUsername"
+                            placeholder="Username"
+                            autoComplete="off"
+                            onChange={onInputChange}
+                        />
+                        <label htmlFor="loginUsername">Email</label>
+                    </div>
+                    <div className="formField dynamic">
+                        <input
+                            type="password"
+                            name="loginPassword"
+                            id="loginPassword"
+                            placeholder="Password"
+                            autoComplete="off"
+                            onChange={onInputChange}
+                        />
+                        <label htmlFor="loginPassword">Password</label>
+                        <div className="btnEye"></div>
+                    </div>
                 </div>
-                <div className="formField dynamic">
-                    <input
-                        type="password"
-                        name="loginPassword"
-                        id="loginPassword"
-                        placeholder="Password"
-                        autoComplete="off"
-                        onChange={onInputChange}
-                    />
-                    <label htmlFor="loginPassword">Password</label>
-                    <div className="btnEye"></div>
-                </div>
-            </div>
-            <div className="btnContainer">
-                <button onClick={handleLogin} className="btnStyle sizeL green">
-                    Login
+                <div className="btnContainer">
+                    <button onClick={handleLogin} className="btnStyle sizeL green">
+                        Login
                 </button>
-                <a href="#">Forgot password?</a>
-            </div>
+                    <a href="#">Forgot password?</a>
+                </div>
+            </div>) : <Redirect to={{pathname: "/dashboard"}}></Redirect>
+            }
         </div>
     );
 };
@@ -147,36 +149,36 @@ const Entry = () => {
     };
 
     return (
-            <div id="entryPageWarpper">
-                <div id="logoContainer">
-                    <img src={icLogoFull} title="VYSIONEER" />
-                </div>
-                <div id="loginContentContainer">
-                    <div id="tabContainer">
-                        <div className="radioField">
-                            <input
-                                onChange={onTablChange}
-                                type="radio"
-                                name="contentTab"
-                                id="tabLogin"
-                                checked={tabIndex == 0}
-                            />
-                            <label htmlFor="tabLogin">Login</label>
-                        </div>
-                        <div className="radioField">
-                            <input
-                                onChange={onTablChange}
-                                type="radio"
-                                name="contentTab"
-                                checked={tabIndex == 1}
-                                id="tabRegister"
-                            />
-                            <label htmlFor="tabRegister">Register</label>
-                        </div>
-                    </div>
-                    {tabIndex == 0 ? <Login /> : <Register />}
-                </div>
+        <div id="entryPageWarpper">
+            <div id="logoContainer">
+                <img src={icLogoFull} title="VYSIONEER" />
             </div>
+            <div id="loginContentContainer">
+                <div id="tabContainer">
+                    <div className="radioField">
+                        <input
+                            onChange={onTablChange}
+                            type="radio"
+                            name="contentTab"
+                            id="tabLogin"
+                            checked={tabIndex == 0}
+                        />
+                        <label htmlFor="tabLogin">Login</label>
+                    </div>
+                    <div className="radioField">
+                        <input
+                            onChange={onTablChange}
+                            type="radio"
+                            name="contentTab"
+                            checked={tabIndex == 1}
+                            id="tabRegister"
+                        />
+                        <label htmlFor="tabRegister">Register</label>
+                    </div>
+                </div>
+                {tabIndex == 0 ? <Login /> : <Register />}
+            </div>
+        </div>
     );
 };
 

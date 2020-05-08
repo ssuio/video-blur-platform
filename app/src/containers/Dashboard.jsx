@@ -47,6 +47,11 @@ const ListRow = (props) => {
     //     }
     //     setStatus(tV.Status);
     // }, []);
+    const [perm, setPerm] = useState(props.video.Perm)
+    const [openSubContent, setOpenSubContent] = useState(false)
+    const [isEditable, setEditable] = useState(false)
+    const [isVideoCheck, setVideoCheck] = useState(props.videoCheckList[props.videoIdx])
+    const videoIdx = props.videoIdx
 
     const toDate = (date) => {
         date = new Date(date);
@@ -54,7 +59,42 @@ const ListRow = (props) => {
         let dd = date.getDate();
         return [(mm > 9 ? "" : "0") + mm, (dd > 9 ? "" : "0") + dd].join("-");
     };
-    
+
+    const handleVideoCheck = (e) => {
+        let checked = e.target.checked;
+        console.log(`set video ${videoIdx} check ${checked}`)
+        setVideoCheck(checked)
+        props.videoCheckList[videoIdx] = checked;
+    }
+
+    const handleSharelink = (e) => {
+        let perm = e.target.checked;
+        apiHelper.updateVideo(props.video.id, { perm })
+            .then(() => {
+                console.log(`set ${perm}`);
+                setPerm(perm);
+            })
+    }
+
+    const toggleSubContent = () => {
+        let val = !openSubContent;
+        setOpenSubContent(val);
+    }
+
+    const toggleEditable = () => {
+        let val = !isEditable;
+        setEditable(val);
+    }
+
+    const copyToClipboard = () => {
+        let textField = document.createElement('textarea')
+        textField.innerText = `https://localhost:9000/sharelink/${props.video.id}`
+        document.body.appendChild(textField)
+        textField.select()
+        document.execCommand('copy')
+        textField.remove()
+    }
+
     return (
         <div className="listRow">
             <div className="mainContent">
@@ -62,8 +102,10 @@ const ListRow = (props) => {
                     <div className="checkboxField">
                         <input
                             type="checkbox"
-                            name="tableFileList"
-                            id="tableListRow1"
+                            name={'tableFileList' + videoIdx}
+                            id={'tableListRow1' + videoIdx}
+                            onChange={handleVideoCheck}
+                            checked={isVideoCheck}
                         />
                         <label htmlFor="tableListRow1"></label>
                     </div>
@@ -72,26 +114,26 @@ const ListRow = (props) => {
                     {toDate(props.video.CreatedTime)}
                 </div>
                 <div className="listCell cellFileName">
-                    <input type="text" value={props.video.name} disabled />
+                    <input type="text" defaultValue={props.video.name} disabled={!isEditable} />
                 </div>
                 <div className="listCell cellPublic">
                     <div className="switchField">
                         <label>
-                            <input type="checkbox" />
+                            <input type="checkbox" checked={perm} onChange={handleSharelink} />
                             <span className="slider"></span>
                         </label>
                     </div>
                 </div>
                 <div className="listCell cellSize">{props.video.Size}</div>
-                <div className={"listCell cellStatus "+props.video.Status}>{props.video.Status}</div>
-                <div className="listCell cellEdit">
+                <div className={"listCell cellStatus " + props.video.Status}>{props.video.Status}</div>
+                <div className="listCell cellEdit" onClick={toggleEditable}>
                     <div className="editIconContainer"></div>
                 </div>
-                <div className="listCell cellBtn">
-                    <div className="cellBtnContainer"></div>
+                <div className="listCell cellBtn" onClick={toggleSubContent}>
+                    <div className={`cellBtnContainer ${openSubContent ? 'open' : ''}`}></div>
                 </div>
             </div>
-            <div className="subContent">
+            <div className={`subContent ${openSubContent ? 'show' : ''}`}>
                 <div className="subListRow rowNotes">
                     <div className="subListCell subListTitle">Notes</div>
                     <div className="subListCell notesTextarea">
@@ -99,18 +141,18 @@ const ListRow = (props) => {
                             name="tableNotes1"
                             id="tableNotes1"
                             rows="2"
-                            disabled
-                        >
-                            {props.video.description}
-                        </textarea>
+                            defaultValue={props.video.description}
+                            disabled={!isEditable}
+                        />
                     </div>
                 </div>
                 <div className="subListRow rowLink">
                     <div className="subListCell subListTitle">Link</div>
-                    <div className="subListCell linkInput">
+                    <div className="subListCell linkInput" onClick={copyToClipboard}>
                         <input
                             type="text"
-                            value="https://www.vysioneer.com/Brain_Tumor_01.mp4"
+                            defaultValue={`https://localhost:9000/sharelink/${props.video.id}`}
+                            disabled
                         />
                         <div className="linkCopyBtn"></div>
                     </div>
@@ -122,12 +164,27 @@ const ListRow = (props) => {
 
 export const Dashboard = (props) => {
     const [videoList, setVideoList] = useState([]);
+    const [videoCheckList, setVideoCheckList] = useState([]);
 
     const refreshVideoList = () => {
         apiHelper.videos().then((videos) => {
+            setVideoCheckList(videos.map(()=>false));
             setVideoList(videos);
         });
     };
+
+    const deleteVideo = async () => {
+        console.log(videoCheckList)
+        for (let idx in videoCheckList){
+            console.log(`check ${idx}`)
+            if(videoCheckList[idx]){
+                console.log('delete');
+                console.log(videoList);
+                console.log(idx);
+                // await apiHelper.deleteVideo(videoList[v])
+            }
+        }
+    }
 
     useEffect(refreshVideoList, []);
 
@@ -136,7 +193,7 @@ export const Dashboard = (props) => {
             <div id="dashboardPageWarpper">
                 <NavMenu />
                 <div className="pageContentContainer" id="uploadPageContent">
-                    <div className="topMessageContainer">Hi, Noah!</div>
+                    <div className="topMessageContainer">Hi, {props.user.name}!</div>
                     <div className="dashboardContentContainer">
                         <header>File List</header>
                         <div id="listTableBtnContainer">
@@ -146,7 +203,7 @@ export const Dashboard = (props) => {
                             >
                                 Refresh
                             </button>
-                            <button className="btnStyle sizeS redLine" disabled>
+                            <button className="btnStyle sizeS redLine" onClick={deleteVideo}>
                                 Delete
                             </button>
                         </div>
@@ -168,7 +225,8 @@ export const Dashboard = (props) => {
                                 <div className="listCell cellBtn"> </div>
                             </div>
                             {videoList.map((v, idx) => {
-                                return <ListRow key={idx} video={v} />;
+                                console.log('map ' + idx)
+                                return <ListRow key={idx} video={v} videoCheckList={videoCheckList} videoIdx={idx}/>;
                             })}
                         </div>
                     </div>

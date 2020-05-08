@@ -16,11 +16,13 @@ const Loading = () => <h1>Loading ... </h1>;
 const PrivateRoute = ({ component: Component, ...rest }) => {
   const [loading, setLoading] = React.useState(true);
   const [auth, setAuth] = React.useState(false);
+  const [user, setUser] = React.useState({});
 
   const checkAuth = () => {
     apiHelper.profile()
-        .then(() => {
+        .then((user) => {
           console.log("Succ auth");
+          setUser(user)
           setAuth(true);
           setLoading(false);
         })
@@ -39,10 +41,10 @@ const PrivateRoute = ({ component: Component, ...rest }) => {
         loading ? (
           <Loading />
         ) : auth ? (
-          <Component {...props} />
+          <Component {...props} user={user} />
         ) : (
           <Redirect
-            to={{ pathname: "/login", state: { from: props.location } }}
+            to={{ pathname: "/entry", state: { from: props.location } }}
           />
         )
       }

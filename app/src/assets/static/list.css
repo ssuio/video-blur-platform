@@ -215,7 +215,7 @@
 			float: left;
 		}
 		.subListCell.subListTitle{
-			width: 140px;
+			width: 170px;
 			text-align: center;
 			font-weight: 600;
 		}
@@ -224,7 +224,7 @@
 			color: #7B8390;
 		}
 		.rowNotes .notesTextarea{
-			width: calc( 100% - 140px );
+			width: calc( 100% - 170px );
 		}
 		.rowNotes textarea{
 			overflow-y: auto;
@@ -256,7 +256,7 @@
 			line-height: 40px;
 		}
 		.rowLink .linkInput{
-			width: calc( 100% - 140px);
+			width: calc( 100% - 170px);
 			position: relative;
 		}
 		.rowLink input[type="text"]{

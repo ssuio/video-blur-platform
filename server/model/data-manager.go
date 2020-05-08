@@ -129,14 +129,14 @@ func (s SqliteProvider) GetVideo(id string) (Video, error) {
 	}
 	defer db.Close()
 
-	stmt, err := db.Prepare("select id, owner_id, perm, name, description, size, created_time from video where id = ?")
+	stmt, err := db.Prepare("select id, owner_id, status, perm, name, description, size, created_time from video where id = ?")
 	if err != nil {
 		return video, err
 	}
 	defer stmt.Close()
 
 	video = Video{}
-	err = stmt.QueryRow(id).Scan(&video.ID, &video.OwnerID, &video.Perm, &video.Name, &video.Description, &video.Size, &video.CreatedTime)
+	err = stmt.QueryRow(id).Scan(&video.ID, &video.OwnerID, &video.Status, &video.Perm, &video.Name, &video.Description, &video.Size, &video.CreatedTime)
 	if err != nil {
 		return video, err
 	}
