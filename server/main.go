@@ -571,7 +571,7 @@ func httpStart() {
 	origins := handlers.AllowedOrigins([]string{"https://localhost:8080", "https://localhost:9000", "https://web.ezsofa.com", "https://web.ezsofa.com"})
 	methods := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
 	cred := handlers.AllowCredentials()
-	log.Fatal(http.ListenAndServeTLS("0.0.0.0:"+os.Getenv("PORT"), "./ssl/cert.pem", "./ssl/private.pem", handlers.CORS(origins, headers, methods, cred)(r)))
+	log.Fatal(http.ListenAndServe("0.0.0.0:"+os.Getenv("PORT"), handlers.CORS(origins, headers, methods, cred)(r)))
 }
 
 func main() {
