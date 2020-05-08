@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const {
-  API_HOST = 'https://api.ezsofa.com'
+  API_HOST = 'http://localhost:9000'
 } = process.env;
 
 axios.defaults.baseURL = `${API_HOST}`;
@@ -70,15 +70,21 @@ class APIHelper {
     return axios.delete(`/video/${id}`).then(r => r.data)
   }
 
-  processVideo(name, desc, file) {
+  transferVideo(name, desc, file) {
+    let fd = new FormData()
+    fd.append('name', name);
+    fd.append('description', desc);
+    fd.append('type', 'FACE_BLUR');
+
     return axios
       .post(
-        `/video-service/videos`,
+        `/video-service/transfer`,
+        fd,
         {
-          name,
-          desc,
-          file,
-        }
+          headers: {
+              'Content-Type': 'multipart/form-data'
+          }
+      }
       )
       .then((r) => r.data);
   }

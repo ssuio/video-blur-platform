@@ -2,9 +2,9 @@ package job
 
 import (
 	"fmt"
-	"time"
 	"os"
 	"os/exec"
+	"time"
 
 	"vysioneer-assignment/model"
 )
@@ -17,10 +17,10 @@ type TaskManager struct {
 	list   []VideoTask
 }
 
-type VideoTaskHandler func(videoID string)(interface{}, error)
+type VideoTaskHandler func(videoID string) (interface{}, error)
 type TaskStatus int
 
-func (tm *TaskManager) AddVideoJob(video model.Video, handler VideoTaskHandler) error{
+func (tm *TaskManager) AddVideoJob(video model.Video, handler VideoTaskHandler) error {
 	task := VideoTask{
 		video.ID,
 		nil,
@@ -36,7 +36,7 @@ func (tm *TaskManager) AddVideoJob(video model.Video, handler VideoTaskHandler) 
 	return nil
 }
 
-func (tm *TaskManager) AddFaceBlurVideoJob(video model.Video) error{
+func (tm *TaskManager) AddFaceBlurVideoJob(video model.Video) error {
 	return tm.AddVideoJob(video, FaceBlurHandler)
 }
 
@@ -61,8 +61,8 @@ func (tm *TaskManager) doVideoJob() {
 	}
 }
 
-func (tm *TaskManager) CheckVideoJob(videoID string) int{
-	for idx,v := range tm.list {
+func (tm *TaskManager) CheckVideoJob(videoID string) int {
+	for idx, v := range tm.list {
 		if v.ID == videoID {
 			return idx + 1
 		}
@@ -71,9 +71,9 @@ func (tm *TaskManager) CheckVideoJob(videoID string) int{
 	return -1
 }
 
-func (tm *TaskManager) Run(){
+func (tm *TaskManager) Run() {
 	fmt.Println("Job manager running...")
-	go func (){
+	go func() {
 		for {
 			time.Sleep(10 * time.Second)
 			fmt.Println("Check Job")
@@ -83,23 +83,23 @@ func (tm *TaskManager) Run(){
 }
 
 type VideoTask struct {
-	ID string
+	ID      string
 	Result  interface{}
-	Error     error
+	Error   error
 	Status  TaskStatus // 0=pending, 1=processing, 2=done, 3=failed
-	video model.Video
+	video   model.Video
 	Handler VideoTaskHandler
 }
 
 func FaceBlurHandler(videoID string) (interface{}, error) {
 	fmt.Println("face blur start")
-	source := "/data/tmp/"+videoID+".mp4"
-	dist := "/data/videos/"+videoID+".mp4"
+	source := "/data/tmp/" + videoID + ".mp4"
+	dist := "/data/videos/" + videoID + ".mp4"
 	out, err := exec.Command(
-		"docker", "run", 
-		"-v", os.Getenv("HOST_DATA_DIR") + ":/data",
-		"-i", "face-blur", 
-		"-i", source, 
+		"docker", "run",
+		"-v", os.Getenv("HOST_DATA_DIR")+":/data",
+		"-i", "face-blur",
+		"-i", source,
 		"-o", dist).Output()
 	if err != nil {
 		fmt.Println(err)

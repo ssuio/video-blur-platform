@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
-	"log"
 	"vysioneer-assignment/auth"
 	"vysioneer-assignment/job"
 	"vysioneer-assignment/model"
@@ -177,7 +177,7 @@ func userHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func uploadHandler(w http.ResponseWriter, r *http.Request) {
+func transferHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(32 << 20)
 	newName := r.FormValue("name")
 	description := r.FormValue("description")
@@ -186,6 +186,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	// funcType := r.FormValue("type")
 	file, _, err := r.FormFile("file")
 	if err != nil {
+		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("500 - Something bad happened!"))
 		return
@@ -223,8 +224,8 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	vs := services.GetVideoService()
 	fmt.Printf("filesize %d\n", fi.Size())
-	fmt.Printf("status %s\n", model.VideoStatusUpload)
-	err = vs.CreateVideo(videoID, model.VideoStatusUpload, user.ID, newName, description, perm, fi.Size(), time.Now().String())
+	fmt.Printf("status %s\n", model.VideoStatusPending)
+	err = vs.CreateVideo(videoID, model.VideoStatusPending, user.ID, newName, description, perm, fi.Size(), time.Now().String())
 	if err != nil {
 		fmt.Println(err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -318,6 +319,7 @@ func videoHandler(w http.ResponseWriter, r *http.Request) {
 	id := params["id"]
 	vs := services.GetVideoService()
 	video, _ := vs.GetVideo(id)
+	fmt.Println(video)
 
 	switch r.Method {
 	case "GET":
@@ -345,6 +347,7 @@ func videoHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		video.Perm = paramVideo.Perm
+		fmt.Println(video)
 		vs := services.GetVideoService()
 		err = vs.UpdateVideo(video)
 		if err != nil {
@@ -562,7 +565,7 @@ func httpStart() {
 	//Video
 	r.HandleFunc("/video/{id}", authHandler(videoHandler)).Methods("GET", "POST", "OPTIONS")
 	r.HandleFunc("/videos", authHandler(videosHandler)).Methods("GET", "OPTIONS")
-	r.HandleFunc("/video-service/upload", authHandler(uploadHandler)).Methods("POST", "OPTIONS")
+	r.HandleFunc("/video-service/transfer", authHandler(transferHandler)).Methods("POST", "OPTIONS")
 	r.HandleFunc("/video-service/download/{id}", authHandler(downloadHandler)).Methods("GET", "OPTIONS")
 	r.HandleFunc("/video-service/browse/{id}", authHandler(browseVideoHandler)).Methods("GET", "OPTIONS")
 	// r.HandleFunc("/video-service/process", authHandler(processVideoHandler)).Methods("POST", "OPTIONS")

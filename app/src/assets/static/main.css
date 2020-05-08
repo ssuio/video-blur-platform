@@ -81,7 +81,35 @@
 		.formField.alert label{
 			color: #FF5C5C;
 		}
-
+		/*=== Fixed Input ===*/ /*-- 0508 NEW --*/
+		.formField.fixed{
+			padding-top: 20px;
+		}
+		.formField.fixed input{
+			font-size: 20px;
+		}
+		
+		.formField.fixed label{
+			position: absolute;
+			font-size: 16px;
+			position: absolute;
+			left: 10px;
+			top:  0px;
+			cursor: pointer;
+			font-weight: bold;
+		}
+		.formField.fixed input::-webkit-input-placeholder{
+			color: #9D9D9D;
+			opacity: 1;
+		}
+		.formField.fixed input::-ms-input-placeholder{
+			color: #9D9D9D;
+			opacity: 1;
+		}
+		.formField.fixed input::-moz-placeholder{
+			color: #9D9D9D;
+			opacity: 1;
+		}
 		/*=== Dynamic Input ===*/
 		.formField.dynamic{
 			padding-top: 20px;
@@ -194,6 +222,12 @@
 		.btnStyle.green:hover, .btnStyle.green:active{
 			background-color: #B4D9CE;
 		}
+		.btnStyle.white{
+			background-color: #F0FAFF;/*-- 0508 NEW --*/
+		}
+		.btnStyle.white:hover, .btnStyle.white:active{
+			background-color: #FFF;/*-- 0508 NEW --*/
+		}
 		.btnStyle.whiteLine{
 			color: #F0FAFF;
 			border: 1px solid #F0FAFF;
@@ -237,9 +271,109 @@
 			background-image: url(../images/ic_check_black.svg);
 			background-color: #9CC6B9;
 		}
-		
+		/*=== Form Checkbox ===*/
+		.formCheckboxField input[type="checkbox"]{
+			display: none;
+			opacity: 0;
+		}
+		.formCheckboxField{
+			float: left;
+			margin-right: 30px;
+		}
+		.formCheckboxField:last-child{
+			margin-right: 0;
+		}
+		.formCheckboxField label::after{
+			display: block;
+			content: "";
+			clear: both;
+			float: none;
+		}
+		.formCheckboxField label .checkboxIcon{
+			display: block;
+			border: 1px solid #F0FAFF;
+			background-image: url(../images/ic_check_white_transparent.svg);
+			background-repeat: no-repeat;
+			background-size: contain;
+			background-position: center;
+			cursor: pointer;
+			width: 36px;
+			height: 36px;
+			float: left;
+			margin-right: 10px;
+		}
+		.formCheckboxField input[type="checkbox"]:checked + label .checkboxIcon{
+			border: 1px solid #9CC6B9;
+			background-image: url(../images/ic_check_black.svg);
+			background-color: #9CC6B9;
+		}
+		.formCheckboxField label .checkboxText{
+			height: 38px;
+			line-height: 38px;
+			font-size: 18px;
+			float: left;
+		}
+
 		/*===============================
-			5. Switch
+			5. Radio
+		================================*/
+		/*-- 0508 NEW --*/
+		.radioField input[type="radio"]{
+			display: none;
+			opacity: 0;
+		}
+		/*=== Form Radio ===*/
+		.formRadioField input[type="radio"]{
+			display: none;
+			opacity: 0;
+		}
+		.formRadioField{
+			float: left;
+			margin-right: 30px;
+		}
+		.formRadioField:last-child{
+			margin-right: 0;
+		}
+		.formRadioField label{
+			cursor: pointer;
+		}
+		.formRadioField label::after{
+			display: block;
+			content: "";
+			clear: both;
+			float: none;
+		}
+		.formRadioField label .radioIcon{
+			display: block;
+			border: 1px solid #F0FAFF;
+			cursor: pointer;
+			width: 36px;
+			height: 36px;
+			border-radius: 50%;
+			float: left;
+			margin-right: 10px;
+		}
+		.formRadioField input[type="radio"]:checked + label .radioIcon{
+			border: 1px solid #9CC6B9;
+		}
+		.formRadioField input[type="radio"]:checked + label .radioInsideCircle{
+			display: block;
+			width: 28px;
+			height: 28px;
+			border-radius: 50%;
+			background: #9CC6B9;
+			margin-top: 4px;
+			margin-left: 4px;
+		}
+		.formRadioField label .radioText{
+			height: 38px;
+			line-height: 38px;
+			font-size: 18px;
+			float: left;
+		}
+
+		/*===============================
+			6. Switch
 		================================*/
 		.switchField label {
 			position: relative;
@@ -294,7 +428,7 @@
 		}
 
 		/*===============================
-			4. Nav
+			7. Nav
 		================================*/
 		nav{
 			width: 80px;
@@ -351,9 +485,9 @@
 			width: 36px;
 		}
 		/*===============================
-			5. Dashboard Content
+			8. Dashboard Content
 		================================*/
-		.dashboard{
+		body.dashboard{
 			background-color: #292F3A;
 		}
 		.pageContentContainer{
@@ -374,4 +508,46 @@
 		.dashboardContentContainer{
 			padding: 110px 60px 30px;
 			position: relative;
+		}
+
+		/*===============================
+			9. Popup
+		================================*/
+		.popup{
+			z-index: 10;
+			position: fixed;
+			left: 0;
+			top: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(11, 21, 41, .7);
+		}
+		.popupMessageContainer{
+			width: 400px;
+			min-height: 200px;
+			border-radius: 10px;
+			background: #FFF;
+			margin: 200px auto 0;
+			box-shadow: 0 0 5px rgba(11, 21, 41, .9);
+			padding: 50px;
+			position: relative;
+		}
+		.popupContentContainer{
+			color: #333;
+			font-weight: 500;
+			text-align: center;
+			font-size: 18px;
+			line-height: 1.5;
+		}
+		.popupContentTitle{
+			font-size: 22px;
+			font-weight: 700;
+			color: #FF5C5C;
+			margin-bottom: 15px;
+		}
+		.popupBtnContainer{
+			width: 350px;
+			position: absolute;
+			bottom: 40px;
+			left: 75px;
 		}

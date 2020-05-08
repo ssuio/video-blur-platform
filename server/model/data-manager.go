@@ -23,18 +23,18 @@ type Video struct {
 	Description string    `json:"description"`
 	Size        int64     `json: "size"`
 	CreatedTime time.Time `json: "createdTime"`
-	ImageUrl    string `json: "imageUrl"`
+	ImageUrl    string    `json: "imageUrl"`
 	OwnerID     int
-	Perm        bool `json: "perm"`
+	Perm        bool   `json: "perm"`
 	Status      string `json: "status"`
 }
 
-const VideoStatusUpload = "uploaded"
+const VideoStatusPending = "pending"
 const VideoStatusProcessing = "processing"
 const VideoStatusDone = "done"
 const VideoStatusError = "error"
 
-// TODO 
+// TODO
 // type PermRule struct {
 // }
 
@@ -190,7 +190,7 @@ func (s SqliteProvider) CreateVideo(id string, status string, ownerID int, name 
 	return nil
 }
 
-func (s SqliteProvider) UpdateVideo (video Video) error{
+func (s SqliteProvider) UpdateVideo(video Video) error {
 	db, err := sql.Open("sqlite3", os.Getenv("SQLITE_FILE"))
 	if err != nil {
 		return err
