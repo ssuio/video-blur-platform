@@ -51,6 +51,7 @@ type DataProvider interface {
 	ListVideos(ownerID int) ([]Video, error)
 	CreateVideo(id string, status string, ownerID int, name string, description string, perm bool, size int64, createdTime string) error
 	UpdateVideo(video Video) error
+	DeleteVideo(videoID string) error
 }
 
 type SqliteProvider struct{}
@@ -204,6 +205,26 @@ func (s SqliteProvider) UpdateVideo(video Video) error {
 	defer stmt.Close()
 
 	_, err = stmt.Exec(video.Name, video.Status, video.Description, video.OwnerID, video.Perm, video.ID)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s SqliteProvider) DeleteVideo(videoID string) error {
+	db, err := sql.Open("sqlite3", os.Getenv("SQLITE_FILE"))
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	stmt, err := db.Prepare("DELETE FROM video WHERE id=?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(videoID)
 	if err != nil {
 		return err
 	}

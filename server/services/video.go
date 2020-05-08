@@ -22,6 +22,10 @@ func (vs VideoService) UpdateVideo(video model.Video) error {
 	return vs.dataManager.UpdateVideo(video)
 }
 
+func (vs VideoService) DeleteVideo(video string) error {
+	return vs.dataManager.DeleteVideo(video)
+}
+
 func (vs VideoService) GetVideo(id string) (model.Video, error) {
 	return vs.dataManager.GetVideo(id)
 }

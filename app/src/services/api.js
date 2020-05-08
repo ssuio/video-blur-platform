@@ -70,11 +70,13 @@ class APIHelper {
     return axios.delete(`/video/${id}`).then(r => r.data)
   }
 
-  transferVideo(name, desc, file) {
+  transferVideo(name, desc, file, perm) {
     let fd = new FormData()
     fd.append('name', name);
     fd.append('description', desc);
     fd.append('type', 'FACE_BLUR');
+    fd.append('perm', perm)
+    fd.append('file', file)
 
     return axios
       .post(

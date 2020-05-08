@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import apiHelper from "../services/api";
 
 const Step1 = (props) => {
     const [name, setName] = useState("");
     const [desc, setDesc] = useState("");
-    const [file, setFile] = useState();
+    const [file, setFiles] = useState(null);
+    const inputRef = useRef();
     const inputTable = {
         uploadFileName: setName,
         uploadNotes: setDesc,
@@ -17,6 +18,11 @@ const Step1 = (props) => {
             desc,
             file,
         });
+        // apiHelper.transferVideo({
+        //   name,
+        //   desc,
+        //   file: inputRef.current.files[0]
+        // })
         props.handleSteps(1);
     };
 
@@ -29,21 +35,21 @@ const Step1 = (props) => {
 
     const fileUploadButton = () => {
         document.getElementById("fileButton").click();
-        document.getElementById("fileButton").onchange = () => {
-            setFile(document.getElementById("fileButton").value);
-        };
+        // document.getElementById("fileButton").onchange = () => {
+        //     setFile(document.getElementById("fileButton").value);
+        // };
     };
 
     const handleFileChange = (e) => {
-        // console.log(e);
-        // apiHelper.transferVideo({
-        //   name,
-        //   desc,
-        //   file: e.target.files[0]
-        // })
-        // props.setup({
-        //     file: e.target.files[0],
-        // });
+        console.log(e.target.input);
+        apiHelper.transferVideo({
+            name,
+            desc,
+            file: e.target.input.files[0],
+        });
+        props.setup({
+            file: e.target.files[0],
+        });
     };
 
     return (
@@ -57,7 +63,8 @@ const Step1 = (props) => {
                     <input
                         id="fileButton"
                         type="file"
-                        // onChange={handleFileChange}
+                        onChange={() => setFiles(inputRef.current.files[0])}
+                        ref={inputRef}
                         hidden
                     />
                     <div id="uploadZoneBtn">
@@ -83,7 +90,7 @@ const Step1 = (props) => {
                         />
                         <label htmlFor="uploadFileName">File Name</label>
                     </div>
-                    <div id="uploadFileType">.type</div>
+                    <div id="uploadFileType">.mp4</div>
                 </div>
                 <div id="uploadNotesTextareaContainer">
                     <textarea
@@ -109,9 +116,15 @@ const Step1 = (props) => {
 };
 
 const Step2 = (props) => {
+    const [perm, setPerm] = useState(false);
     const next = () => {
-        console.log("step2 next page");
         props.handleSteps(2);
+        props.setup({ perm });
+    };
+
+    const permOnChange = (e) => {
+        console.log(e.target.checked);
+        setPerm(e.target.checked);
     };
     return (
         <div>
@@ -139,6 +152,7 @@ const Step2 = (props) => {
                                 type="radio"
                                 name="transferAddEffect"
                                 id="transferAddEffectN"
+                                disabled
                             />
                             <label htmlFor="transferAddEffectN">
                                 <div className="radioIcon">
@@ -161,7 +175,7 @@ const Step2 = (props) => {
                             />
                             <label htmlFor="transferTypeMosaic">
                                 <div className="checkboxIcon"></div>
-                                <div className="checkboxText">Mosaic</div>
+                                <div className="checkboxText">Face Blur</div>
                             </label>
                         </div>
                         <div className="formCheckboxField">
@@ -193,7 +207,11 @@ const Step2 = (props) => {
                         <div className="transferFormTitle">Public</div>
                         <div className="switchField">
                             <label>
-                                <input type="checkbox" />
+                                <input
+                                    type="checkbox"
+                                    onChange={permOnChange}
+                                    checked={perm}
+                                />
                                 <span className="slider"></span>
                             </label>
                         </div>
@@ -215,13 +233,15 @@ const Step2 = (props) => {
 
 const Step3 = (props) => {
     const goToVideoList = () => {
-        console.log("go");
         props.goToVideoList();
     };
 
     let params = props.getParams();
     console.log(params);
-    apiHelper.transferVideo(params).then(console.log).catch(console.error);
+    apiHelper
+        .transferVideo(params.name, params.desc, params.file, params.perm)
+        .then(console.log)
+        .catch(console.error);
 
     return (
         <div>
@@ -244,26 +264,6 @@ const Step3 = (props) => {
                 >
                     Go to List
                 </button>
-            </div>
-        </div>
-    );
-};
-
-const FinishPopout = () => {
-    return (
-        <div>
-            <div class="popup">
-                <div class="popupMessageContainer">
-                    <div class="popupContentContainer">
-                        <div class="popupContentTitle">Alert!</div>
-                        Sorry someone is uploading,
-                        <br />
-                        please wait a moment.
-                    </div>
-                    <div class="popupBtnContainer">
-                        <button class="btnStyle sizeL green">Close</button>
-                    </div>
-                </div>
             </div>
         </div>
     );

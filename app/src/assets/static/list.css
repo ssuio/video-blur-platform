@@ -129,8 +129,11 @@
 			text-align: center;
 			width: 140px;
 		}
-		.listRow .listCell.cellStatus.loading{
-			color: #7B8390;
+		.listRow .listCell.cellStatus.pending{
+			color: rgb(233, 160, 76);
+		}
+		.listRow .listCell.cellStatus.processing{
+			color: rgb(22, 144, 63);
 		}
 		.listRow .listCell.cellStatus.error{
 			color: #FF5C5C;

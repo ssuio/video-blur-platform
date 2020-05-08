@@ -65,7 +65,7 @@ const ListRow = (props) => {
 
     const copyToClipboard = () => {
         let textField = document.createElement('textarea')
-        textField.innerText = `https://localhost:9000/sharelink/${props.video.id}`
+        textField.innerText = `https://api.ezsofa.com/sharelink/${props.video.id}`
         document.body.appendChild(textField)
         textField.select()
         document.execCommand('copy')
@@ -128,7 +128,7 @@ const ListRow = (props) => {
                     <div className="subListCell linkInput" onClick={copyToClipboard}>
                         <input
                             type="text"
-                            defaultValue={`https://localhost:9000/sharelink/${props.video.id}`}
+                            defaultValue={`https://api.ezsofa.com/sharelink/${props.video.id}`}
                             disabled
                         />
                         <div className="linkCopyBtn"></div>
