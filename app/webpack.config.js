@@ -61,5 +61,6 @@ module.exports = {
     compress: true,
     historyApiFallback: true,
     hot: true,
+    disableHostCheck: true
   },
 };

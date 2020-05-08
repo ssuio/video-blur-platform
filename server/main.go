@@ -567,7 +567,7 @@ func httpStart() {
 	r.HandleFunc("/sharelink/{id}", sharelinkHandler).Methods("GET", "OPTIONS")
 
 	headers := handlers.AllowedHeaders([]string{"Set-Cookie", "X-Requested-With", "Content-Type", "authorization", "access-control-allow-origin", "Accept", "Content-Length", "Accept-Encoding", "X-CSRF-Token"})
-	origins := handlers.AllowedOrigins([]string{"http://localhost:8080", "http://localhost:9000"})
+	origins := handlers.AllowedOrigins([]string{"http://localhost:8080", "http://localhost:9000", "http://vysioneer-web-1755721854.ap-northeast-1.elb.amazonaws.com", "http://web.ezsofa.com"})
 	methods := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
 	cred := handlers.AllowCredentials()
 	http.ListenAndServe("0.0.0.0:"+os.Getenv("PORT"), handlers.CORS(origins, headers, methods, cred)(r))

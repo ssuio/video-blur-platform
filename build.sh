@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker build -t vysioneer-assignment .
+docker build -t vysioneer-assignment-server .

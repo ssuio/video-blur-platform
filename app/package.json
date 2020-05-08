@@ -4,7 +4,7 @@
   "main": "src/index.js",
   "scripts": {
     "clean": "rm -rf ../server/dist/*",
-    "start": "webpack-dev-server --mode development --hot --config webpack.config.js",
+    "start": "webpack-dev-server --host 0.0.0.0 --mode development --hot --config webpack.config.js",
     "build": "babel src --out-dir ../server/dist",
     "dist": "npm run clean && webpack --mode production --config webpack.config.js"
   },
