@@ -180,7 +180,7 @@ const VideoList = (props) => {
                     {videoList.map((v, idx) => {
                         return (
                             <ListRow
-                                key={idx}
+                                key={v.id}
                                 video={v}
                                 updateVideoCheckList={updateVideoCheckList}
                                 videoCheckList={videoCheckList}
