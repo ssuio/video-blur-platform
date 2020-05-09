@@ -30,7 +30,7 @@ Download `face-recognition.tar.gz` and build it `docker build -t face-blur .`.4.
 2. Click left site navigate bar to <b>Transfer Page </b>.
 3. Follow step1 to step3, you will complete a video uploaded and create a task to backend server.
 
-### VideoList
+### Video List Handbook
 
 1. Click left site navigate bar to <b>Video List Page </b>. 
 2. The video just uploaded will get into <b>pending</b> state.
