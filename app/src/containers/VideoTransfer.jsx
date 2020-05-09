@@ -58,7 +58,7 @@ const Step1 = (props) => {
                 <div id="uploadZone">
                     <div id="uploadZoneMessage">
                         <div id="uploadZoneIcon"></div>
-                        Drag and Drop to upload
+                        { file ? file.name : "Drag and Drop to upload" }
                     </div>
                     <input
                         id="fileButton"
