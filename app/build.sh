@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker build -t vysioneer-assignment-app .
+docker build -t video-processing-app .

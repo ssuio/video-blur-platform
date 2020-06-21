@@ -1,8 +1,8 @@
 package services
 
 import (
-	"vysioneer-assignment/job"
-	"vysioneer-assignment/model"
+	"video-processing/job"
+	"video-processing/model"
 )
 
 var userService *UserService = &UserService{

@@ -192,7 +192,7 @@ const Entry = () => {
     return (
         <div id="entryPageWarpper">
             <div id="logoContainer">
-                <img src={icLogoFull} title="VYSIONEER" />
+                <img src={icLogoFull} title="Video Processing" />
             </div>
             <div id="loginContentContainer">
                 <div id="tabContainer">

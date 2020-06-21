@@ -1,8 +1,8 @@
 version: "3"
 services:
-  vysioneer-assignment:
-    container_name: vysioneer-server
-    image: vysioneer-assignment-server
+  video-processing-server:
+    container_name: vp-server
+    image: video-processing-server
     ports:
       - 9000:9000
     volumes:
@@ -11,17 +11,17 @@ services:
     environment: 
       PORT: 9000
       HOST: 0.0.0.0
-      HOST_DATA_DIR: /home/ssuio/vysioneer-assignment/server/data
+      HOST_DATA_DIR: /home/ssuio/video-processing/server/data
       DATA_DIR: /data
-      SQLITE_FILE: /data/vysioneer.db
+      SQLITE_FILE: /data/vp.db
       VIDEO_DIR: /data/videos/
       TMP_DIR: /data/tmp/
       SESSION_KEY: ssuio
-  vysioneer-assignment-app:
-    container_name: vysioneer-app
-    image: vysioneer-assignment-app
+  video-processing-app:
+    container_name: vp-app
+    image: video-processing-app
     ports:
       - 8080:8080
     environment: 
       API_HOST: api.ezsofa.com
-      NODE_ENV: production  
+      NODE_ENV: production

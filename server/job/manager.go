@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"time"
 
-	"vysioneer-assignment/model"
+	"video-processing/model"
 )
 
 var jobManager *TaskManager

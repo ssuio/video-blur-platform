@@ -11,10 +11,10 @@ import (
 	"os"
 	"strconv"
 	"time"
-	"vysioneer-assignment/auth"
-	"vysioneer-assignment/job"
-	"vysioneer-assignment/model"
-	"vysioneer-assignment/services"
+	"video-processing/auth"
+	"video-processing/job"
+	"video-processing/model"
+	"video-processing/services"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -56,7 +56,7 @@ func generalHandler(f ViewFunc) ViewFunc {
 
 func authHandler(f ViewFunc) ViewFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		session, err := store.Get(r, "vysioneer-assignment")
+		session, err := store.Get(r, "video-processing")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -81,7 +81,7 @@ func healthHandler(w http.ResponseWriter, r *http.Request) {
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 	var user model.User
-	session, err := store.Get(r, "vysioneer-assignment")
+	session, err := store.Get(r, "video-processing")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -106,7 +106,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func logoutHandler(w http.ResponseWriter, r *http.Request) {
-	session, err := store.Get(r, "vysioneer-assignment")
+	session, err := store.Get(r, "video-processing")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -149,7 +149,7 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func userHandler(w http.ResponseWriter, r *http.Request) {
-	session, err := store.Get(r, "vysioneer-assignment")
+	session, err := store.Get(r, "video-processing")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -213,7 +213,7 @@ func transferHandler(w http.ResponseWriter, r *http.Request) {
 	fi, _ := f.Stat()
 
 	//Record video meta
-	session, err := store.Get(r, "vysioneer-assignment")
+	session, err := store.Get(r, "video-processing")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -264,7 +264,7 @@ func downloadHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	videoID := vars["id"]
 
-	session, err := store.Get(r, "vysioneer-assignment")
+	session, err := store.Get(r, "video-processing")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -390,7 +390,7 @@ func videoHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func videosHandler(w http.ResponseWriter, r *http.Request) {
-	session, err := store.Get(r, "vysioneer-assignment")
+	session, err := store.Get(r, "video-processing")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -469,7 +469,7 @@ func videosHandler(w http.ResponseWriter, r *http.Request) {
 // 	}
 
 // 	//Record video meta
-// 	session, err := store.Get(r, "vysioneer-assignment")
+// 	session, err := store.Get(r, "video-processing")
 // 	if err != nil {
 // 		http.Error(w, err.Error(), http.StatusInternalServerError)
 // 		return
@@ -501,7 +501,7 @@ func browseVideoHandler(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	videoID := params["id"]
 
-	session, err := store.Get(r, "vysioneer-assignment")
+	session, err := store.Get(r, "video-processing")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -602,6 +602,6 @@ func httpStart() {
 }
 
 func main() {
-	fmt.Println("VYSIONEER assignment running...")
+	fmt.Println("VP running...")
 	httpStart()
 }

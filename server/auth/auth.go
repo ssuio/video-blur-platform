@@ -1,13 +1,13 @@
 package auth
 
 import (
-	"vysioneer-assignment/services"
-	"vysioneer-assignment/model"
+	"bytes"
+	"encoding/base64"
 	"errors"
 	"net/http"
 	"strings"
-	"bytes"
-	"encoding/base64"
+	"video-processing/model"
+	"video-processing/services"
 )
 
 func AuthUser(w http.ResponseWriter, r *http.Request) (model.User, error) {
@@ -20,7 +20,7 @@ func AuthUser(w http.ResponseWriter, r *http.Request) (model.User, error) {
 		)
 		if err == nil {
 			pair := bytes.SplitN(payload, []byte(":"), 2)
-			if len(pair) == 2  {
+			if len(pair) == 2 {
 				account := string(pair[0])
 				password := string(pair[1])
 				us := services.GetUserService()
@@ -30,13 +30,12 @@ func AuthUser(w http.ResponseWriter, r *http.Request) (model.User, error) {
 				}
 				if user.Password == password {
 					return user, nil
-				}else{
+				} else {
 					return user, errors.New("User password wrong")
 				}
 			}
 		}
 	}
-		
-	return user, errors.New("User basic auth failed");
-}
 
+	return user, errors.New("User basic auth failed")
+}

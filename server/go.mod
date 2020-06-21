@@ -1,4 +1,4 @@
-module vysioneer-assignment
+module video-processing
 
 go 1.14
 

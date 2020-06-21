@@ -20,8 +20,8 @@ const NavMenu = (props) => {
         <div>
             <nav>
                 <div id="navLogoContainer">
-                    <a href="https://www.vysioneer.com">
-                        <img src={icLogoIcon} title="VYSIONEER" />
+                    <a href="https://web.ezsofa.com">
+                        <img src={icLogoIcon} title="Video Processing" />
                     </a>
                 </div>
                 <ul>

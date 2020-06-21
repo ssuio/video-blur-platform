@@ -1,3 +1,3 @@
 #!/bin/bash
 
-docker build -t vysioneer-assignment-server .
+docker build -t video-processing-server .
